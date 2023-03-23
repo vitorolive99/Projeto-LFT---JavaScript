@@ -71,6 +71,7 @@ tokens=['INTEIRO',
         'DECREMENT', 
         'ATRIBUICAO', 
         'INCREMENTN', 
+        'EXPONENCIACAO',
         'DECREMENTN', 
         'MULTINCREMENT', 
         'DIVINCREMENT', 
@@ -95,11 +96,12 @@ tokens=['INTEIRO',
         'LCOLCHETE', 
         'RCOLCHETE', 
         'PV', 
+        'VIRGULA',
         'ASPAD',
         'ASPAS', 
         'STRINGD',
         'STRINGS',
-        'FLOAT',
+        'NFLOAT',
         'OCTAL',
         'HEXADECIMAL',
         'COMMENT',
@@ -115,6 +117,7 @@ t_MULT = r'\*'
 t_DIV = r'/'
 t_RESTO = r'%'
 t_INCREMENT = r'\+\+'
+t_EXPONENCIACAO = r'\*\*'
 t_DECREMENT = r'--'
 t_ATRIBUICAO = r'='
 t_INCREMENTN = r'\+='
@@ -142,6 +145,7 @@ t_RPAREN = r'\)'
 t_LCOLCHETE = r'['
 t_RCOLCHETE = r']'
 t_PV = r';'
+T_VIRGULA = r','
 t_ASPASD = r'\''
 t_ASPAS = r'\"'
 
@@ -165,14 +169,14 @@ def t_error(t):
     t.lexer.skip(1)
 
 def t_COMMENT(t):
-    r'//'
+    r'//.*\n'
     pass
 
 def t_COMMENTMULTI(t):
     r'/\*[^]+\*/'
     pass
 
-def t_FLOAT(t):
+def t_NFLOAT(t):
     r'\d+\.\d+'
     t.value = float(t.value)
     return t
