@@ -145,7 +145,7 @@ t_RPAREN = r'\)'
 t_LCOLCHETE = r'['
 t_RCOLCHETE = r']'
 t_PV = r';'
-T_VIRGULA = r','
+t_VIRGULA = r','
 t_ASPASD = r'\''
 t_ASPAS = r'\"'
 
