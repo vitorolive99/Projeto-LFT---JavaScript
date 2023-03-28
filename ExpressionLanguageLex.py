@@ -97,7 +97,7 @@ tokens=['INTEIRO',
         'RCOLCHETE', 
         'PV', 
         'VIRGULA',
-        'ASPAD',
+        'ASPASD',
         'ASPAS', 
         'STRINGD',
         'STRINGS',
@@ -105,10 +105,7 @@ tokens=['INTEIRO',
         'OCTAL',
         'HEXADECIMAL',
         'COMMENT',
-        'COMMENTMULTI',
-        'TRUE',
-        'FALSE',
-        'NULL',
+        'COMMENTMULTI'
         ] + list(reservadas.values())
 
 t_SOMA = r'\+'
@@ -134,20 +131,20 @@ t_MENORQ = r'<'
 t_MAIORIGUALQ = r'>='
 t_MENORIGUALQ = r'<='
 t_AND = r'&&'
-t_OR = r'||'
+t_OR = r'\|\|'
 t_NEGACAO = r'!'
-t_TERNARIO1 = r'?'
+t_TERNARIO1 = r'\?'
 t_TERNARIO2 = r':'
 t_LCHAVES = r'\{'
 t_RCHAVES = r'\}'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
-t_LCOLCHETE = r'['
-t_RCOLCHETE = r']'
+t_LCOLCHETE = '\['
+t_RCOLCHETE = '\]'
 t_PV = r';'
 t_VIRGULA = r','
-t_ASPASD = r'\''
-t_ASPAS = r'\"'
+t_ASPASD = r'\"'
+t_ASPAS = r'\''
 
 def t_STRINGD(t):
     r'[\"][^\"\n][\"]'
@@ -173,7 +170,7 @@ def t_COMMENT(t):
     pass
 
 def t_COMMENTMULTI(t):
-    r'/\*[^]+\*/'
+    r'/\*.*\*/'
     pass
 
 def t_NFLOAT(t):
