@@ -20,6 +20,21 @@ import ply.lex as lex
 import ply.yacc as yacc
 from ExpressionLanguageLex import *
 
+precedence = (
+    ('left', 'VIRGULA'),
+    ('right', 'ATRIBUICAO', 'INCREMENTN', 'DECREMENTN', 'MULTINCREMENT', 'DIVINCREMENT', 'RESTOINCREMENT'),
+    ('right', 'TERNARIO1', 'TERNARIO2'),
+    ('left', 'OR'),
+    ('left', 'AND'),
+    ('left', 'IGUAL', 'DIFERENTE', 'IGUALPACARAI', 'DIFERENTEPACARAI'),
+    ('left', 'MENORQ', 'MENORIGUALQ', 'MAIORQ', 'MAIORIGUALQ', 'IN', 'INSTANCEOF'),
+    ('left', 'SOMA', 'SUB'),
+    ('left', 'MULT', 'DIV', 'RESTO'),
+    ('right', 'EXPONENCIACAO'),
+    ('right', 'DECREMENT', 'INCREMENT', 'NEGACAO'),
+    
+)
+
 def p_program(p):
     '''program : funcdecl
                | funcdecl program
