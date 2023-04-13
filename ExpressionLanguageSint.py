@@ -32,6 +32,7 @@ precedence = (
     ('left', 'MULT', 'DIV', 'RESTO'),
     ('right', 'EXPONENCIACAO'),
     ('right', 'DECREMENT', 'INCREMENT', 'NEGACAO'),
+    ('left', 'LPAREN','RPAREN')
     
 )
 
@@ -40,6 +41,12 @@ def p_program(p):
                | funcdecl program
                | vardecl PV
                | vardecl PV program'''
+    if(len(p) == 4):
+        p[0] = p[1] + p[2] + p[3]
+    elif(len(p) == 3):
+        p[0] = p[1] + p[2]
+    else:
+        p[0] = p[1]
 
 def p_vardecl(p):
     '''vardecl : tipodecl ID
@@ -51,6 +58,7 @@ def p_vardecl(p):
 
 def p_funcdecl(p):
     '''funcdecl : signature body'''
+    
 
 def p_signature(p):
     '''signature : FUNCTION ID LPAREN sigParams RPAREN'''
@@ -146,13 +154,15 @@ data2 = '''
 function some (a, b){ 
     a = 88 + 44; 
     b = 70; 
-    sumparabola(1, 2, 3);         
-    while (true){ 
-        c = 38; 
-        sumparabola(5, true, false); 
-        while (c){ 
-            sumparabola(5, true, true); 
-        } 
+    sumparabola(1, 2, 3); 
+    if (b==70){     
+        while (true){ 
+            c = 38; 
+            sumparabola(5, true, false); 
+            while (c){ 
+                sumparabola(5, true, true); 
+            } 
+        }
     } 
     soma(); 
     sumparabolac(2); 
@@ -162,4 +172,4 @@ function some (a, b){
 lexer = lex.lex()
 lexer.input(data2)
 parser = yacc.yacc()
-result = parser.parse(debug=False)
+result = parser.parse(debug=True)

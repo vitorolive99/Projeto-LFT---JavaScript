@@ -207,3 +207,7 @@ def t_NULL(t):
     r'null'
     t.value = None
     return t
+
+def t_BRANCO(t):
+    r'[\t ]+'
+    pass
