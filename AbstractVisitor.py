@@ -1,6 +1,23 @@
 from abc import abstractmethod, ABCMeta
 
 class AbstractVisitor(metaclass=ABCMeta):
+    
+    @abstractmethod
+    def visitProgramFuncDecl(self, program):
+        pass
+
+    @abstractmethod
+    def visitProgramVarDecl(self, program):
+        pass
+
+    @abstractmethod
+    def visitProgramFuncDeclProgram(self, program):
+        pass
+
+    @abstractmethod
+    def visitProgramVarDeclProgram(self, program):
+        pass
+
     @abstractmethod
     def visitVarDecl(self, varDecl):
         pass
@@ -23,10 +40,6 @@ class AbstractVisitor(metaclass=ABCMeta):
 
     @abstractmethod
     def visitVarDeclIntListExp(self, varDeclIntListExp):
-        pass
-
-    @abstractmethod
-    def visitVarDeclIDlistExplEmpty (self, varDeclIDlistExplEmpty):
         pass
 
     @abstractmethod

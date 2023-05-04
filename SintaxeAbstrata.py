@@ -13,6 +13,29 @@ class ProgramFuncDecl(Program):
 
     def accept(self, visitor):
         return visitor.visitProgramFuncDecl(self)
+    
+class programFuncDeclProgram(Program):
+    def __init__(self, funcdecl, program):
+        self.funcdecl = funcdecl
+        self.program = program
+
+    def accept(self, visitor):
+        return visitor.visitProgramFuncDeclProgram(self)
+    
+class programVarDecl(Program):
+    def __init__(self, vardecl):
+        self.vardecl = vardecl
+
+    def accept(self, visitor):
+        return visitor.visitProgramVarDecl(self)
+    
+class programVarDeclProgram(Program):
+    def __init__(self, vardecl, program):
+        self.vardecl = vardecl
+        self.program = program
+
+    def accept(self, visitor):
+        return visitor.visitProgramVarDeclProgram(self)
 
 '''declaracao de variaveis'''
 class varDecl(metaclass=ABCMeta):
@@ -65,13 +88,6 @@ class varDeclIDintlistexp(varDecl):
     def accept(self, visitor):
         return visitor.visitVarDeclIDintlistexp(self)
     
-class varDeclIDlistexplempty(varDecl):
-    def __init__(self, type, id):
-        self.type = type
-        self.id = id
-
-    def accept(self, visitor):
-        return visitor.visitVarDeclIDlistexplempty(self)
 
 '''declaracao de funcoes'''
 

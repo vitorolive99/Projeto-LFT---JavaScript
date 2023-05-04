@@ -43,15 +43,16 @@ def p_program(p):
 
 def p_program1(p):
     '''program : funcdecl program'''
-    p[0] = [p[1]] + p[2]
+    p[0] = sa.programFuncDeclProgram(p[1], p[2])
 
 def p_program2(p):
     '''program : vardecl PV'''
-    p[0] = p[1]
+    p[0] = sa.programVarDecl(p[1])
 
 def p_program3(p):
     '''program : vardecl PV program'''
-    p[0] = [p[1]] + sa.Program(p[3])
+    p[0] = sa.programVarDeclProgram(p[1], p[3])
+    
 
 def p_vardecl(p):
     '''vardecl : tipodecl ID
@@ -72,7 +73,7 @@ def p_vardecl(p):
     
 def p_vardecl1(p):
     '''vardecl : tipodecl ID ATRIBUICAO LCOLCHETE RCOLCHETE'''
-    p[0] = sa.varDeclIDlistexplempty(p[1], p[2])
+    p[0] = sa.varDeclIDlistexp(p[1], p[2], None)
 
 def p_funcdecl(p):
     '''funcdecl : signature body'''
@@ -303,7 +304,7 @@ def p_tipodecl(p):
                 | VAR'''
     p[0] = sa.tipodecl(p[1])
 
-def p_stringD(p):
+def p_string(p):
     '''string : STRINGD
               | STRINGS'''
     p[0] = sa.string(p[1])
