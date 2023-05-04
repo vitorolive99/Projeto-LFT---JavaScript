@@ -19,6 +19,7 @@
 import ply.lex as lex
 import ply.yacc as yacc
 from ExpressionLanguageLex import *
+import SintaxeAbstrata as sa
 
 precedence = (
     ('left', 'VIRGULA'),
@@ -37,118 +38,285 @@ precedence = (
 )
 
 def p_program(p):
-    '''program : funcdecl
-               | funcdecl program
-               | vardecl PV
-               | vardecl PV program'''
-    if(len(p) == 4):
-        p[0] = p[1] + p[2] + p[3]
-    elif(len(p) == 3):
-        p[0] = p[1] + p[2]
-    else:
-        p[0] = p[1]
+    '''program : funcdecl'''
+    p[0] = p[1]
+
+def p_program1(p):
+    '''program : funcdecl program'''
+    p[0] = [p[1]] + p[2]
+
+def p_program2(p):
+    '''program : vardecl PV'''
+    p[0] = p[1]
+
+def p_program3(p):
+    '''program : vardecl PV program'''
+    p[0] = [p[1]] + sa.Program(p[3])
 
 def p_vardecl(p):
     '''vardecl : tipodecl ID
                | tipodecl ID ATRIBUICAO exp
                | tipodecl ID LCOLCHETE INTEIRO RCOLCHETE
                | tipodecl ID ATRIBUICAO LCOLCHETE listexp RCOLCHETE
-               | tipodecl ID LCOLCHETE INTEIRO RCOLCHETE ATRIBUICAO listexp
-               | tipodecl ID ATRIBUICAO LCOLCHETE RCOLCHETE'''
+               | tipodecl ID LCOLCHETE INTEIRO RCOLCHETE ATRIBUICAO listexp'''
+    if len(p) == 3:
+        p[0] = sa.varDeclID(p[1], p[2])
+    elif len(p) == 5:
+        p[0] = sa.varDeclIDexp(p[1], p[2], p[4])
+    elif len(p) == 6:
+        p[0] = sa.varDeclIDint(p[1], p[2], p[4])
+    elif len(p) == 7:
+        p[0] = sa.varDeclIDlistexp(p[1], p[2], p[5])
+    elif len(p) == 8:
+        p[0] = sa.varDeclIDintlistexp(p[1], p[2], p[4], p[6])
+    
+def p_vardecl1(p):
+    '''vardecl : tipodecl ID ATRIBUICAO LCOLCHETE RCOLCHETE'''
+    p[0] = sa.varDeclIDlistexplempty(p[1], p[2])
 
 def p_funcdecl(p):
     '''funcdecl : signature body'''
+    p[0] = sa.funcDeclSignatureBody(p[1], p[2])
     
 
 def p_signature(p):
     '''signature : FUNCTION ID LPAREN sigParams RPAREN'''
+    p[0] = sa.signatureIDsigParams(p[2], p[4])
 
 def p_sigParams(p):
     '''sigParams : ID
                  | ID VIRGULA sigParams'''
+    if len(p) == 2:
+        p[0] = sa.SingleSigParams(p[1])
+    else:
+        p[0] = sa.CompoundSigParams(p[1], p[3])
 
 def p_body(p): 
     '''body : LCHAVES stms RCHAVES'''
+    p[0] = sa.bodystms(p[2])
 
 def p_stms(p):
     '''stms : stm
             | stm stms'''
+    if len(p) == 2:
+        p[0] = sa.singleStm(p[1])
+    else:
+        p[0] = sa.CompoundStm(p[1], p[2])
 
 def p_stm(p):
     '''stm : vardecl PV
-           | exp PV
-           | WHILE LPAREN exp RPAREN bodyorstm
-           | RETURN exp PV
-           | IF LPAREN exp RPAREN bodyorstm
-           | IF LPAREN exp RPAREN bodyorstm ELSE bodyorstm
-           | FOR LPAREN opexp PV opexp PV opexp RPAREN bodyorstm'''
+           | RETURN exp PV'''
+    if len(p) == 3:
+        p[0] = sa.StmVarDecl(p[1])
+    else:
+        p[0] = sa.StmReturn(p[2])
+    
+def p_stm1(p):
+    '''stm : exp PV'''
+    p[0] = sa.StmExp(p[1])
+
+def p_stmWhile(p):
+    '''stm : WHILE LPAREN exp RPAREN bodyorstm'''
+    p[0] = sa.StmWhile(p[3], p[5])
+
+def p_opexpIf(p):
+    '''stm : IF LPAREN exp RPAREN bodyorstm'''
+    p[0] = sa.StmIf(p[3], p[5])
+
+def p_stmFor(p):
+    '''stm : FOR LPAREN opexp PV opexp PV opexp RPAREN bodyorstm'''
+    p[0] = sa.StmFor(p[3], p[5], p[7], p[9])
+
+def p_stmIfElse(p):
+    '''stm : IF LPAREN exp RPAREN bodyorstm ELSE bodyorstm'''
+    p[0] = sa.StmIfElse(p[3], p[5], p[7])
 
 def p_opexp(p):
     '''opexp : exp
              | VOID'''
+    if isinstance(p[1], sa.exp):
+        p[0] = sa.ExpOpexp(p[1])
+    else:
+        p[0] = sa.ExpOpexp(None)
+    
 
 def p_bodyorstm(p):
     '''bodyorstm : body
                  | stm'''
+    if isinstance(p[1], sa.body):
+        p[0] = sa.BodyOrStm(p[1])
+    else:
+        p[0] = sa.BodyOrStmStm(p[1])
 
-def p_exp(p):
-    '''exp : exp SOMA exp 
-            | exp SUB exp 
-            | exp DIV exp 
-            | exp MULT exp 
-            | exp RESTO exp 
-            | exp INCREMENT 
-            | exp EXPONENCIACAO exp 
-            | exp DECREMENT 
-            | exp INCREMENTN exp 
-            | exp DECREMENTN exp 
-            | exp MULTINCREMENT exp 
-            | exp DIVINCREMENT exp
-            | exp RESTOINCREMENT exp 
-            | exp IGUAL exp 
-            | exp IGUALPACARAI exp 
-            | exp DIFERENTE exp 
-            | exp DIFERENTEPACARAI exp 
-            | exp MAIORQ exp 
-            | exp MENORQ exp 
-            | exp MENORIGUALQ exp 
-            | exp MAIORIGUALQ exp 
-            | exp AND exp 
-            | exp OR exp 
-            | NEGACAO exp 
-            | exp TERNARIO1 exp TERNARIO2 exp 
-            | call 
-            | assign 
-            | INTEIRO 
-            | FLOAT 
-            | ID 
-            | string 
-            | TRUE 
-            | FALSE'''
+def p_expSoma(p):
+    '''exp : exp SOMA exp'''
+    p[0] = sa.SomaExp(p[1], p[3])
+    
+def p_expBoolean(p):
+    '''exp : FALSE
+           | TRUE'''
+    p[0] = sa.BooleanExp(p[1])
+
+def p_expString(p):
+    '''exp : string'''
+    p[0] = sa.StringExp(p[1])
+
+def p_expId(p):
+    '''exp : ID'''
+    p[0] = sa.IdExp(p[1])
+
+def p_expFloat(p):
+    '''exp : FLOAT'''
+    p[0] = sa.RealExp(p[1])
+
+def p_expInt(p):
+    '''exp : INTEIRO'''
+    p[0] = sa.InteiroExp(p[1])
+
+def p_expAssign(p):
+    '''exp : assign'''
+    p[0] = sa.AssignExp(p[1])
+
+def p_expCall(p):
+    '''exp : call'''
+    p[0] = sa.CallExp(p[1])
+
+def p_expTernario(p):
+    '''exp : exp TERNARIO1 exp TERNARIO2 exp'''
+    p[0] = sa.TernarioExp(p[1], p[3], p[5])
+
+def p_expNegacao(p):
+    '''exp : NEGACAO exp'''
+    p[0] = sa.NotExp(p[2])
+
+def p_expOr(p):
+    '''exp : exp OR exp'''
+    p[0] = sa.OrExp(p[1], p[3])
+
+def p_expAnd(p):
+    '''exp : exp AND exp'''
+    p[0] = sa.AndExp(p[1], p[3])
+
+def p_expMaiorIgual(p):
+    '''exp : exp MAIORIGUALQ exp'''
+    p[0] = sa.MaiorIgualQExp(p[1], p[3])
+
+def p_expMenorIgual(p):
+    '''exp : exp MENORIGUALQ exp'''
+    p[0] = sa.MenorIgualQExp(p[1], p[3])
+
+def p_expMenorQ(p):
+    '''exp : exp MENORQ exp'''
+    p[0] = sa.MenorQExp(p[1], p[3])
+
+def p_expMaiorQ(p):
+    '''exp : exp MAIORQ exp'''
+    p[0] = sa.MaiorQExp(p[1], p[3])
+
+def p_expDiferentePacarai(p):
+    '''exp : exp DIFERENTEPACARAI exp'''
+    p[0] = sa.diferentepracaraiExp(p[1], p[3])
+
+def p_expDiferente(p):
+    '''exp : exp DIFERENTE exp'''
+    p[0] = sa.DiferenteExp(p[1], p[3])
+
+def p_expIgualPacarai(p):
+    '''exp : exp IGUALPACARAI exp'''
+    p[0] = sa.igualpracaraiExp(p[1], p[3])
+
+def p_expIgual(p):
+    '''exp : exp IGUAL exp'''
+    p[0] = sa.IgualExp(p[1], p[3])
+
+def p_expRestoIncrement(p):
+    '''exp : exp RESTOINCREMENT exp'''
+    p[0] = sa.RestoIncrementoExp(p[1], p[3])
+
+def p_expDivIncrement(p):
+    '''exp : exp DIVINCREMENT exp'''
+    p[0] = sa.DivIncrementoExp(p[1], p[3])
+
+def p_expMultIncrement(p):
+    '''exp : exp MULTINCREMENT exp'''
+    p[0] = sa.MultIncrementoExp(p[1], p[3])
+
+def p_expDecrementN(p):
+    '''exp : DECREMENTN exp'''
+    p[0] = sa.DecrementoNExp(p[2])
+
+def p_expIncrementN(p):
+    '''exp : INCREMENTN exp'''
+    p[0] = sa.IncrementoNExp(p[2])
+
+def p_expDecrement(p):
+    '''exp : exp DECREMENT'''
+    p[0] = sa.DecrementoExp(p[1])
+
+def p_expExponenciacao(p):
+    '''exp : exp EXPONENCIACAO exp'''
+    p[0] = sa.ExponecialExp(p[1], p[3])
+
+def p_expIncrement(p):
+    '''exp : exp INCREMENT'''
+    p[0] = sa.IncrementoExp(p[1])
+
+def p_expResto(p):
+    '''exp : exp RESTO exp'''
+    p[0] = sa.RestoExp(p[1], p[3])
+
+def p_expMult(p):
+    '''exp : exp MULT exp'''
+    p[0] = sa.MultExp(p[1], p[3])
+
+def p_expDiv(p):
+    '''exp : exp DIV exp'''
+    p[0] = sa.DivExp(p[1], p[3])
+
+def p_expSub(p):
+    '''exp : exp SUB exp'''
+    p[0] = sa.SubExp(p[1], p[3])
 
 def p_call(p):
     '''call : ID LPAREN params RPAREN
             | ID LPAREN RPAREN'''
+    if len(p) == 5:
+        p[0] = sa.ParamsCall(p[1], p[3])
+    else:
+        p[0] = sa.NoParamsCall(p[1])
 
 def p_params(p):
     '''params : exp VIRGULA params
               | exp'''
+    if len(p) == 4:
+        p[0] = sa.CompoundParams(p[1], p[3])
+    else:
+        p[0] = sa.SingleParams(p[1])
 
 def p_assign(p):
     '''assign : ID ATRIBUICAO exp'''
+    p[0] = sa.AssignAssign(p[1], p[3])
 
 def p_tipodecl(p):
     '''tipodecl : LET
-                | VAR
-                | CONST'''
+                | CONST
+                | VAR'''
+    p[0] = sa.tipodecl(p[1])
 
-def p_string(p):
+def p_stringD(p):
     '''string : STRINGD
               | STRINGS'''
+    p[0] = sa.string(p[1])
+
+
 
 def p_listexp(p):
     '''listexp : exp
                | exp VIRGULA listexp'''
+    if len(p) == 4:
+        p[0] = sa.CompoundListexp(p[1], p[3])
+    else:
+        p[0] = sa.SingleListexp(p[1])
 
 data2 = '''
 function some (a, b){ 
@@ -169,7 +337,8 @@ function some (a, b){
     return true; 
 }
 '''
-lexer = lex.lex()
-lexer.input(data2)
-parser = yacc.yacc()
-result = parser.parse(debug=True)
+if __name__ == '__main__':
+    lexer = lex.lex()
+    lexer.input(data2)
+    parser = yacc.yacc()
+    print (parser.parse(debug=True))

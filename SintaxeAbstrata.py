@@ -1,6 +1,18 @@
 from abc import abstractmethod
 from abc import ABCMeta
 
+'''programa'''
+class Program(metaclass=ABCMeta):
+    @abstractmethod
+    def accept(self, visitor):
+        pass
+
+class ProgramFuncDecl(Program):
+    def __init__(self, funcdecl):
+        self.funcdecl = funcdecl
+
+    def accept(self, visitor):
+        return visitor.visitProgramFuncDecl(self)
 
 '''declaracao de variaveis'''
 class varDecl(metaclass=ABCMeta):
@@ -9,14 +21,16 @@ class varDecl(metaclass=ABCMeta):
         pass
 
 class varDeclID(varDecl):
-    def __init__(self, id):
+    def __init__(self, type, id):
+        self.type = type
         self.id = id
 
     def accept(self, visitor):
         return visitor.visitVarDeclID(self)
     
 class varDeclIDexp(varDecl):
-    def __init__(self, id, exp):
+    def __init__(self, type, id, exp):
+        self.type = type
         self.id = id
         self.exp = exp
 
@@ -24,7 +38,8 @@ class varDeclIDexp(varDecl):
         return visitor.visitVarDeclIDexp(self)
     
 class varDeclIDint(varDecl):
-    def __init__(self, id, int):
+    def __init__(self, type, id, int):
+        self.type = type
         self.id = id
         self.int = int
 
@@ -32,7 +47,8 @@ class varDeclIDint(varDecl):
         return visitor.visitVarDeclIDint(self)
     
 class varDeclIDlistexp(varDecl):
-    def __init__(self, id, listexp):
+    def __init__(self, type, id, listexp):
+        self.type = type
         self.id = id
         self.listexp = listexp
 
@@ -40,7 +56,8 @@ class varDeclIDlistexp(varDecl):
         return visitor.visitVarDeclIDlistexp(self)
     
 class varDeclIDintlistexp(varDecl):
-    def __init__(self, id, int, listexp):
+    def __init__(self, type, id, int, listexp):
+        self.type = type
         self.id = id
         self.int = int
         self.listexp = listexp
@@ -49,7 +66,8 @@ class varDeclIDintlistexp(varDecl):
         return visitor.visitVarDeclIDintlistexp(self)
     
 class varDeclIDlistexplempty(varDecl):
-    def __init__(self, id):
+    def __init__(self, type, id):
+        self.type = type
         self.id = id
 
     def accept(self, visitor):
@@ -306,7 +324,7 @@ class DecrementoNExp(exp):
     def accept(self, visitor):
         return visitor.visitDecrementoExp(self)
     
-class MultIncrementoNExp(exp):
+class MultIncrementoExp(exp):
     def __init__(self, exp1, exp2):
         self.exp1 = exp1
         self.exp2 = exp2
@@ -314,7 +332,7 @@ class MultIncrementoNExp(exp):
     def accept(self, visitor):
         return visitor.visitMultIncrementoExp(self)
     
-class DivIncrementoNExp(exp):
+class DivIncrementoExp(exp):
     def __init__(self, exp1, exp2):
         self.exp1 = exp1
         self.exp2 = exp2
@@ -322,7 +340,7 @@ class DivIncrementoNExp(exp):
     def accept(self, visitor):
         return visitor.visitDivIncrementoExp(self)
 
-class RestoIncrementoNExp(exp):
+class RestoIncrementoExp(exp):
     def __init__(self, exp1, exp2):
         self.exp1 = exp1
         self.exp2 = exp2
@@ -426,13 +444,6 @@ class TernarioExp(exp):
     def accept(self, visitor):
         return visitor.visitTernarioExp(self)
     
-class CallExp(exp):
-    def __init__(self, call):
-        self.call = call
-
-    def accept(self, visitor):
-        return visitor.visitCallExp(self)
-    
 class AssignExp(exp):
     def __init__(self, assign):
         self.assign = assign
@@ -468,19 +479,19 @@ class StringExp(exp):
     def accept(self, visitor):
         return visitor.visitStringExp(self)
     
-class TrueExp(exp):
-    def __init__(self):
-        pass
+class CallExp(exp):
+    def __init__(self, id):
+        self.id = id
 
     def accept(self, visitor):
-        return visitor.visitTrueExp(self)
-
-class FalseExp(exp):
-    def __init__(self):
-        pass
+        return visitor.visitCallExp(self)
+    
+class BooleanExp(exp):
+    def __init__(self, boolean):
+        self.booleanValue = boolean
 
     def accept(self, visitor):
-        return visitor.visitFalseExp(self)
+        return visitor.visitBooleanExp(self)
 
 class Opexp(metaclass=ABCMeta):
     @abstractmethod
@@ -493,13 +504,6 @@ class ExpOpexp(Opexp):
 
     def accept(self, visitor):
         return visitor.visitExpOpexp(self)
-    
-class VoidOpexp(Opexp):
-    def __init__(self):
-        pass
-
-    def accept(self, visitor):
-        return visitor.visitVoidOpexp(self)
     
 class Listexp(metaclass=ABCMeta):
     @abstractmethod
@@ -578,4 +582,28 @@ class AssignAssign(Assign):
 
     def accept(self, visitor):
         return visitor.visitAssignAssign(self)
+    
+class tipoDecl(metaclass=ABCMeta):
+    @abstractmethod
+    def accept(self, visitor):
+        pass
+
+class tipodecl(tipoDecl):
+    def __init__(self, tipo):
+        self.tipo = tipo
+
+    def accept(self, visitor):
+        return visitor.visittipodecl(self)
+    
+class String (metaclass=ABCMeta):
+    @abstractmethod
+    def accept(self, visitor):
+        pass
+
+class string(String):
+    def __init__(self, string):
+        self.string = string
+
+    def accept(self, visitor):
+        return visitor.visitstringD(self)
     

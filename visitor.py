@@ -54,3 +54,35 @@ class Visitor(AbstractVisitor):
     def visitSingleSigParams(self, singleSigParams):
         singleSigParams.id.accept(self)
         print(singleSigParams.id)
+
+def main():
+    data2 = '''
+    function some (a, b){ 
+        a = 88 + 44; 
+        b = 70; 
+        sumparabola(1, 2, 3); 
+        if (b==70){     
+            while (true){ 
+                c = 38; 
+                sumparabola(5, true, false); 
+                while (c){ 
+                    sumparabola(5, true, true); 
+                } 
+            }
+        } 
+        soma(); 
+        sumparabolac(2); 
+        return true; 
+    }
+    '''
+    lexer = lex.lex()
+    lexer.input(data2)
+    parser = yacc.yacc()
+    result = parser.parse(debug=False)
+    print("#imprime o programa que foi passado como entrada")
+    visitor = Visitor()
+    for r in result:
+        r.accept(visitor)
+
+if __name__ == "__main__":
+    main()
