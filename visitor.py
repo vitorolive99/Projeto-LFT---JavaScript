@@ -50,11 +50,11 @@ class Visitor():
         print(varDeclIntListExp.int)
         varDeclIntListExp.listexp.accept(self)
 
-    def visitFuncDeclSignatureBody(self, funcDeclSignatureBody):
-        funcDeclSignatureBody.signature.accept(self)
-        funcDeclSignatureBody.body.accept(self)
+    def visitfuncDeclSignatureBody(self, signatureBody):
+        signatureBody.signature.accept(self)
+        signatureBody.body.accept(self)
 
-    def visitSignatureIDSigParams(self, signatureIDSigParams):
+    def visitSignatureIDsigParams(self, signatureIDSigParams):
         print(signatureIDSigParams.id)
         signatureIDSigParams.sigParams.accept(self)
 
@@ -236,7 +236,7 @@ class Visitor():
     def visitAssignExp(self, assignExp):
         assignExp.assign.accept(self)
 
-    def visitIteiroExp(self, iteiroExp):
+    def visitInteiroExp(self, iteiroExp):
         print(iteiroExp.inteiro)
 
     def visitRealExp(self, realExp):
@@ -248,8 +248,8 @@ class Visitor():
     def visitStringExp(self, stringExp):
         stringExp.string.accept(self)
 
-    def CallExp(self, callExp):
-        callExp.call.accept(self)
+    def visitCallExp(self, callExp):
+        callExp.id.accept(self)
 
     def visitBooleanExp(self, booleanExp):
         print(booleanExp.booleanValue)
@@ -295,7 +295,8 @@ class Visitor():
     
     
 
-def main():
+if __name__ == "__main__":
+
     data2 = '''
     function some (a, b){ 
         a = 88 + 44; 
@@ -321,9 +322,5 @@ def main():
     result = parser.parse(debug=False)
     print("#imprime o programa que foi passado como entrada")
     visitor = Visitor()
-    print(visitor)
     for r in result:
         r.accept(visitor)
-
-if __name__ == "__main__":
-    main()

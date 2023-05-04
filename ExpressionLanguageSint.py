@@ -39,7 +39,7 @@ precedence = (
 
 def p_program(p):
     '''program : funcdecl'''
-    p[0] = p[1]
+    p[0] = [p[1]]
 
 def p_program1(p):
     '''program : funcdecl program'''

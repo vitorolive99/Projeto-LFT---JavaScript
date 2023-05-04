@@ -102,7 +102,7 @@ class funcDeclSignatureBody(funcDecl):
         self.body = body
 
     def accept(self, visitor):
-        return visitor.visitFuncDeclSignatureBody(self)
+        return visitor.visitfuncDeclSignatureBody(self)
     
 '''assinatura de funcoes'''
 
@@ -131,7 +131,7 @@ class SingleSigParams(sigParams):
         self.id = id
 
     def accept(self, visitor):
-        return visitor.visitSigParamsID(self)
+        return visitor.visitSingleSigParams(self)
     
 class CompoundSigParams(sigParams):
     def __init__(self, id, sigParams):
@@ -139,7 +139,7 @@ class CompoundSigParams(sigParams):
         self.sigParams = sigParams
 
     def accept(self, visitor):
-        return visitor.visitSigParamsIDsigParams(self)
+        return visitor.visitCompoundSigParams(self)
     
 '''corpo de funcoes'''
 
@@ -153,7 +153,7 @@ class bodystms(body):
         self.stms = stms
 
     def accept(self, visitor):
-        return visitor.visitBodyLCHAVESstmsRCHAVES(self)
+        return visitor.visitbodystms(self)
 
 class bodystm(metaclass=ABCMeta):
     @abstractmethod
@@ -228,7 +228,7 @@ class StmReturn(stm):
         self.exp = exp
 
     def accept(self, visitor):
-        return visitor.visitStmReturn(self) 
+        return visitor.visitReturn(self) 
     
 class StmIf(stm):
     def __init__(self, exp, bodyorstm):

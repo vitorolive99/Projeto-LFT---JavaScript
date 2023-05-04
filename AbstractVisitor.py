@@ -55,7 +55,7 @@ class AbstractVisitor(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def visitSignatureIDSigParams(self, signatureIDSigParams):
+    def visitSignatureIDsigParams(self, signatureIDSigParams):
         pass
 
     @abstractmethod
