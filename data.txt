@@ -1,0 +1,10 @@
+var fatorial = calcularFatorial(contador);
+consolelog('Fatorial de', contador, ':', fatorial);
+
+contador++;
+
+if (contador <= 5) {
+  consolelog('Contador é menor ou igual a 5');
+} else {
+  consolelog('Contador é maior do que 5');
+}

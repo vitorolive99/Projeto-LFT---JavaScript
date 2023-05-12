@@ -1,5 +1,5 @@
 # Rascunho da gramatica
-# program → funcdecl | funcdecl program | vardecl ; | vardecl ; program
+# program → funcdecl | funcdecl program | vardecl ; program | call ; | call ; program |  exp ; | exp ; program | stms | stms program
 # vardecl → tipodecl ID | tipodecl ID = exp | tipodecl ID [ INTEIRO ] | tipodecl ID = [ listexp ] | tipodecl ID [ INTEIRO ] = listexp | tipodecl ID = []
 # funcdecl → signature body
 # signature → FUNCTION ID ( sigParams )
@@ -9,12 +9,11 @@
 # stm → vardecl ; | exp ;  | while ( exp ) bodyorstm | return exp ; | if ( exp ) bodyorstm | if ( exp ) bodyorstm else bodyorstm | for ( opexp;opexp;opexp ) bodyorstm 
 # opexp → exp | VOID
 # bodyorstm → body | stm
-# exp → exp + exp | exp - exp | exp / exp | exp * exp | exp % exp | exp ++ |exp ** exp | exp -- | exp += exp | exp -= exp | exp *= exp | exp /= exp| exp %= exp | exp == exp | exp === exp | exp != exp | exp !== exp | exp > exp | exp < exp | exp <= exp | exp >= exp | exp && exp | exp || exp | !exp | exp ? exp : exp | call | assign | INTEIRO | FLOAT | ID | string | TRUE | FALSE
+# exp → exp + exp | exp - exp | exp / exp | exp * exp | exp % exp | exp ++ |exp ** exp | exp -- | exp += exp | exp -= exp | exp *= exp | exp /= exp| exp %= exp | exp == exp | exp === exp | exp != exp | exp !== exp | exp > exp | exp < exp | exp <= exp | exp >= exp | exp && exp | exp || exp | !exp | exp ? exp : exp | call | assign | INTEIRO | FLOAT | ID | TRUE | FALSE | vardecl | STRING
 # call → ID (params) | ID ( )
 # params → exp, params | exp
 # assign → ID = exp
 # tipodecl → LET | VAR | CONST
-# string → STRINGD | STRINGS
 # listexp →  exp | exp , listexp 
 import ply.lex as lex
 import ply.yacc as yacc
@@ -39,20 +38,39 @@ precedence = (
 
 def p_program(p):
     '''program : funcdecl'''
-    p[0] = [p[1]]
+    p[0] = sa.ProgramFuncDecl(p[1])
 
 def p_program1(p):
     '''program : funcdecl program'''
     p[0] = sa.programFuncDeclProgram(p[1], p[2])
 
-def p_program2(p):
-    '''program : vardecl PV'''
-    p[0] = sa.programVarDecl(p[1])
-
 def p_program3(p):
     '''program : vardecl PV program'''
     p[0] = sa.programVarDeclProgram(p[1], p[3])
     
+def p_program4(p):
+    '''program : call PV'''
+    p[0] = sa.programCall(p[1])
+
+def p_program5(p):
+    '''program : call PV program'''
+    p[0] = sa.programCallProgram(p[1], p[3])
+
+def p_program6(p):
+    '''program : exp PV'''
+    p[0] = sa.programExp(p[1])
+
+def p_program7(p):
+    '''program : exp PV program'''
+    p[0] = sa.programExpProgram(p[1], p[3])
+
+def p_program8(p):
+    '''program : stms'''
+    p[0] = sa.programStms(p[1])
+
+def p_program9(p):
+    '''program : stms program'''
+    p[0] = sa.programStmsProgram(p[1], p[2])
 
 def p_vardecl(p):
     '''vardecl : tipodecl ID
@@ -120,13 +138,13 @@ def p_stmWhile(p):
     '''stm : WHILE LPAREN exp RPAREN bodyorstm'''
     p[0] = sa.StmWhile(p[3], p[5])
 
-def p_opexpIf(p):
-    '''stm : IF LPAREN exp RPAREN bodyorstm'''
-    p[0] = sa.StmIf(p[3], p[5])
-
 def p_stmFor(p):
     '''stm : FOR LPAREN opexp PV opexp PV opexp RPAREN bodyorstm'''
     p[0] = sa.StmFor(p[3], p[5], p[7], p[9])
+
+def p_opexpIf(p):
+    '''stm : IF LPAREN exp RPAREN bodyorstm'''
+    p[0] = sa.StmIf(p[3], p[5])
 
 def p_stmIfElse(p):
     '''stm : IF LPAREN exp RPAREN bodyorstm ELSE bodyorstm'''
@@ -149,6 +167,11 @@ def p_bodyorstm(p):
     else:
         p[0] = sa.BodyOrStmStm(p[1])
 
+
+def p_expVardecl(p):
+    '''exp : vardecl'''
+    p[0] = sa.ExpVarDecl(p[1])
+
 def p_expSoma(p):
     '''exp : exp SOMA exp'''
     p[0] = sa.SomaExp(p[1], p[3])
@@ -157,10 +180,6 @@ def p_expBoolean(p):
     '''exp : FALSE
            | TRUE'''
     p[0] = sa.BooleanExp(p[1])
-
-def p_expString(p):
-    '''exp : string'''
-    p[0] = sa.StringExp(p[1])
 
 def p_expId(p):
     '''exp : ID'''
@@ -243,12 +262,12 @@ def p_expMultIncrement(p):
     p[0] = sa.MultIncrementoExp(p[1], p[3])
 
 def p_expDecrementN(p):
-    '''exp : DECREMENTN exp'''
-    p[0] = sa.DecrementoNExp(p[2])
+    '''exp : exp DECREMENTN exp'''
+    p[0] = sa.DecrementoNExp(p[1],p[3])
 
 def p_expIncrementN(p):
-    '''exp : INCREMENTN exp'''
-    p[0] = sa.IncrementoNExp(p[2])
+    '''exp : exp INCREMENTN exp'''
+    p[0] = sa.IncrementoNExp(p[1],p[3])
 
 def p_expDecrement(p):
     '''exp : exp DECREMENT'''
@@ -278,6 +297,10 @@ def p_expSub(p):
     '''exp : exp SUB exp'''
     p[0] = sa.SubExp(p[1], p[3])
 
+def p_expString(p):
+    '''exp : STRING '''
+    p[0] = sa.StringExp(p[1])
+
 def p_call(p):
     '''call : ID LPAREN params RPAREN
             | ID LPAREN RPAREN'''
@@ -303,13 +326,6 @@ def p_tipodecl(p):
                 | CONST
                 | VAR'''
     p[0] = sa.tipodecl(p[1])
-
-def p_string(p):
-    '''string : STRINGD
-              | STRINGS'''
-    p[0] = sa.string(p[1])
-
-
 
 def p_listexp(p):
     '''listexp : exp
@@ -339,7 +355,8 @@ function some (a, b){
 }
 '''
 if __name__ == '__main__':
+    f = open('data.txt', 'r')
     lexer = lex.lex()
-    lexer.input(data2)
+    lexer.input(f.read())
     parser = yacc.yacc()
-    print (parser.parse(debug=True))
+    parser.parse(debug=True)

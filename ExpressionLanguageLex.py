@@ -99,8 +99,7 @@ tokens=['INTEIRO',
         'VIRGULA',
         'ASPASD',
         'ASPAS', 
-        'STRINGD',
-        'STRINGS',
+        'STRING',
         'NFLOAT',
         'OCTAL',
         'HEXADECIMAL',
@@ -146,11 +145,15 @@ t_VIRGULA = r','
 t_ASPASD = r'\"'
 t_ASPAS = r'\''
 
-def t_STRINGD(t):
-    r'[\"][^\"\n][\"]'
+def t_STRING_DBL(t):
+    r'[\"][^\"\n]*[\"]'
+    t.type = reservadas.get(t.value, 'STRING')
+    return t
 
-def t_STRINGS(t):
-    r'[\'][^\'\n][\']'
+def t_STRING_SGL(t):
+    r'[\'][^\'\n]*[\']'
+    t.type = reservadas.get(t.value, 'STRING')
+    return t
 
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
@@ -211,3 +214,11 @@ def t_NULL(t):
 def t_BRANCO(t):
     r'[\t ]+'
     pass
+
+if __name__ == '__main__':
+    f = open('data.txt', 'r')
+    lexer = lex.lex(debug=1)
+    lexer.input(f.read())
+    print('\n\n# lexer output:')
+    for tok in lexer:
+       print ('type:', tok.type, ', value:',tok.value)

@@ -1,18 +1,13 @@
 from ExpressionLanguageSint import *
+from visitor import Visitor
 
-# global tab
-tab = 0
-
-def blank():
-    p = ''
-    for x in range(tab):
-        p = p + ' '
-    return p
-
-class Visitor():
+class SemanticVisitor():
 
     def visitProgramFuncDecl(self, program):
         program.funcdecl.accept(self)
+
+    def visitProgramVarDecl(self, program):
+        program.vardecl.accept(self)
 
     def visitProgramFuncDeclProgram(self, program):
         program.funcdecl.accept(self)
@@ -20,28 +15,6 @@ class Visitor():
 
     def visitProgramVarDeclProgram(self, program):
         program.vardecl.accept(self)
-        program.program.accept(self)
-
-
-    def visitProgramCall(self, program):
-        program.call.accept(self)
-
-    def visitProgramCallProgram(self, program):
-        program.call.accept(self)
-        program.program.accept(self)
-
-    def visitProgramExp(self, program):
-        program.exp.accept(self)
-
-    def visitProgramExpProgram(self, program):
-        program.exp.accept(self)
-        program.program.accept(self)
-
-    def visitProgramStms(self, program):
-        program.stms.accept(self)
-
-    def visitProgramStmsProgram(self, program):
-        program.stms.accept(self)
         program.program.accept(self)
 
     def visitVarDeclID (self, varDeclID):
@@ -128,9 +101,6 @@ class Visitor():
         stmFor.exp3.accept(self)
         stmFor.bodyorstm.accept(self)
 
-    def visitExpVardecl(self, expVardecl):
-        expVardecl.vardecl.accept(self)
-
     def visitSomaExp(self, somaExp):
         somaExp.exp1.accept(self)
         print('+')
@@ -160,19 +130,9 @@ class Visitor():
         incrementoExp.exp.accept(self)
         print('++')
 
-    def visitIncrementoNExp(self, incrementoNExp):
-        incrementoNExp.exp1.accept(self)
-        print('+=')
-        incrementoNExp.exp2.accept(self)
-
     def visitDecrementoExp(self, decrementoExp):
         decrementoExp.exp.accept(self)
         print('--')
-
-    def visitDecrementoNExp(self, decrementoNExp):
-        decrementoNExp.exp1.accept(self)
-        print('-=')
-        decrementoNExp.exp2.accept(self)
 
     def visitExponencialExp(self, exponencialExp):
         exponencialExp.exp1.accept(self)
@@ -277,6 +237,9 @@ class Visitor():
     def visitIdExp(self, idExp):
         print(idExp.id)
 
+    def visitStringExp(self, stringExp):
+        stringExp.string.accept(self)
+
     def visitCallExp(self, callExp):
         callExp.id.accept(self)
 
@@ -318,8 +281,8 @@ class Visitor():
     def visittipodecl(self, tipodecl):
         print(tipodecl.tipo)
 
-    def visitStringExp(self, stringExp):
-        print(stringExp.stringd)
+    def visitstring(self, string):
+        print(string.string)
 
     
     
@@ -346,9 +309,8 @@ if __name__ == "__main__":
     }
     '''
 
-    f = open("data.txt", "r")
     lexer = lex.lex()
-    lexer.input(f.read())
+    lexer.input(data2)
     parser = yacc.yacc()
     parser.parse(debug=False)
     print("#imprime o programa que foi passado como entrada")
