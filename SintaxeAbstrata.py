@@ -1,6 +1,5 @@
 from abc import abstractmethod
 from abc import ABCMeta
-from visitor import *
 
 '''programa'''
 class Program(metaclass=ABCMeta):
@@ -23,36 +22,6 @@ class programFuncDeclProgram(Program):
     def accept(self, visitor):
         return visitor.visitProgramFuncDeclProgram(self)
     
-class programCall(Program):
-    def __init__(self, call):
-        self.call = call
-
-    def accept(self, visitor):
-        return visitor.visitProgramCall(self)
-    
-class programCallProgram(Program):
-    def __init__(self, call, program):
-        self.call = call
-        self.program = program
-
-    def accept(self, visitor):
-        return visitor.visitProgramCallProgram(self)
-    
-class programExp(Program):
-    def __init__(self, exp):
-        self.exp = exp
-
-    def accept(self, visitor):
-        return visitor.visitProgramExp(self)
-    
-class programExpProgram(Program):
-    def __init__(self, exp, program):
-        self.exp = exp
-        self.program = program
-
-    def accept(self, visitor):
-        return visitor.visitProgramExpProgram(self)
-    
 class programStms(Program):
     def __init__(self, stms):
         self.stms = stms
@@ -67,14 +36,6 @@ class programStmsProgram(Program):
 
     def accept(self, visitor):
         return visitor.visitProgramStmsProgram(self)
-    
-class programVarDeclProgram(Program):
-    def __init__(self, vardecl, program):
-        self.vardecl = vardecl
-        self.program = program
-
-    def accept(self, visitor):
-        return visitor.visitProgramVarDeclProgram(self)
 
 '''declaracao de variaveis'''
 class varDecl(metaclass=ABCMeta):
@@ -240,13 +201,6 @@ class stm(metaclass=ABCMeta):
     @abstractmethod
     def accept(self, visitor):
         pass
-
-class StmVarDecl(stm):
-    def __init__(self, varDecl):
-        self.varDecl = varDecl
-
-    def accept(self, visitor):
-        return visitor.visitStmVarDecl(self)
     
 class StmExp(stm):
     def __init__(self, exp):

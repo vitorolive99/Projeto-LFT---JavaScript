@@ -1,12 +1,12 @@
 # Rascunho da gramatica
-# program → funcdecl | funcdecl program | vardecl ; program | call ; | call ; program |  exp ; | exp ; program | stms | stms program
+# program → funcdecl | funcdecl program | stms | stms program
 # vardecl → tipodecl ID | tipodecl ID = exp | tipodecl ID [ INTEIRO ] | tipodecl ID = [ listexp ] | tipodecl ID [ INTEIRO ] = listexp | tipodecl ID = []
 # funcdecl → signature body
 # signature → FUNCTION ID ( sigParams )
 # sigparams → ID |  ID , sigparams
 # body → { stms }
 # stms → stm | stm stms
-# stm → vardecl ; | exp ;  | while ( exp ) bodyorstm | return exp ; | if ( exp ) bodyorstm | if ( exp ) bodyorstm else bodyorstm | for ( opexp;opexp;opexp ) bodyorstm 
+# stm → exp ;  | while ( exp ) bodyorstm | return exp ; | if ( exp ) bodyorstm | if ( exp ) bodyorstm else bodyorstm | for ( opexp;opexp;opexp ) bodyorstm 
 # opexp → exp | VOID
 # bodyorstm → body | stm
 # exp → exp + exp | exp - exp | exp / exp | exp * exp | exp % exp | exp ++ |exp ** exp | exp -- | exp += exp | exp -= exp | exp *= exp | exp /= exp| exp %= exp | exp == exp | exp === exp | exp != exp | exp !== exp | exp > exp | exp < exp | exp <= exp | exp >= exp | exp && exp | exp || exp | !exp | exp ? exp : exp | call | assign | INTEIRO | FLOAT | ID | TRUE | FALSE | vardecl | STRING
@@ -32,8 +32,7 @@ precedence = (
     ('left', 'MULT', 'DIV', 'RESTO'),
     ('right', 'EXPONENCIACAO'),
     ('right', 'DECREMENT', 'INCREMENT', 'NEGACAO'),
-    ('left', 'LPAREN','RPAREN')
-    
+    ('nonassoc', 'LPAREN', 'RPAREN')
 )
 
 def p_program(p):
@@ -44,31 +43,11 @@ def p_program1(p):
     '''program : funcdecl program'''
     p[0] = sa.programFuncDeclProgram(p[1], p[2])
 
-def p_program3(p):
-    '''program : vardecl PV program'''
-    p[0] = sa.programVarDeclProgram(p[1], p[3])
-    
-def p_program4(p):
-    '''program : call PV'''
-    p[0] = sa.programCall(p[1])
-
-def p_program5(p):
-    '''program : call PV program'''
-    p[0] = sa.programCallProgram(p[1], p[3])
-
-def p_program6(p):
-    '''program : exp PV'''
-    p[0] = sa.programExp(p[1])
-
-def p_program7(p):
-    '''program : exp PV program'''
-    p[0] = sa.programExpProgram(p[1], p[3])
-
-def p_program8(p):
+def p_program2(p):
     '''program : stms'''
     p[0] = sa.programStms(p[1])
 
-def p_program9(p):
+def p_program3(p):
     '''program : stms program'''
     p[0] = sa.programStmsProgram(p[1], p[2])
 
@@ -123,12 +102,8 @@ def p_stms(p):
         p[0] = sa.CompoundStm(p[1], p[2])
 
 def p_stm(p):
-    '''stm : vardecl PV
-           | RETURN exp PV'''
-    if len(p) == 3:
-        p[0] = sa.StmVarDecl(p[1])
-    else:
-        p[0] = sa.StmReturn(p[2])
+    '''stm : RETURN exp PV'''
+    p[0] = sa.StmReturn(p[2])
     
 def p_stm1(p):
     '''stm : exp PV'''
@@ -142,13 +117,13 @@ def p_stmFor(p):
     '''stm : FOR LPAREN opexp PV opexp PV opexp RPAREN bodyorstm'''
     p[0] = sa.StmFor(p[3], p[5], p[7], p[9])
 
-def p_opexpIf(p):
-    '''stm : IF LPAREN exp RPAREN bodyorstm'''
-    p[0] = sa.StmIf(p[3], p[5])
-
 def p_stmIfElse(p):
     '''stm : IF LPAREN exp RPAREN bodyorstm ELSE bodyorstm'''
     p[0] = sa.StmIfElse(p[3], p[5], p[7])
+
+def p_opexpIf(p):
+    '''stm : IF LPAREN exp RPAREN bodyorstm'''
+    p[0] = sa.StmIf(p[3], p[5])
 
 def p_opexp(p):
     '''opexp : exp

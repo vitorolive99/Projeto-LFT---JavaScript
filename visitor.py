@@ -18,25 +18,6 @@ class Visitor():
         program.funcdecl.accept(self)
         program.program.accept(self)
 
-    def visitProgramVarDeclProgram(self, program):
-        program.vardecl.accept(self)
-        program.program.accept(self)
-
-
-    def visitProgramCall(self, program):
-        program.call.accept(self)
-
-    def visitProgramCallProgram(self, program):
-        program.call.accept(self)
-        program.program.accept(self)
-
-    def visitProgramExp(self, program):
-        program.exp.accept(self)
-
-    def visitProgramExpProgram(self, program):
-        program.exp.accept(self)
-        program.program.accept(self)
-
     def visitProgramStms(self, program):
         program.stms.accept(self)
 
@@ -102,9 +83,6 @@ class Visitor():
 
     def visitStmExp(self, stmExp):
         stmExp.exp.accept(self)
-
-    def visitStmVarDecl(self, stmVarDecl):
-        stmVarDecl.vardecl.accept(self)
 
     def visitStmWhile(self, stmWhile):
         stmWhile.exp.accept(self)
