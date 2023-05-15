@@ -6,7 +6,7 @@
 # sigparams → ID |  ID , sigparams
 # body → { stms }
 # stms → stm | stm stms
-# stm → exp ;  | while ( exp ) bodyorstm | return exp ; | if ( exp ) bodyorstm | if ( exp ) bodyorstm else bodyorstm | for ( opexp;opexp;opexp ) bodyorstm 
+# stm → exp ; | while ( exp ) bodyorstm | return exp ; | if ( exp ) bodyorstm | if ( exp ) bodyorstm else bodyorstm | for ( opexp;opexp;opexp ) bodyorstm 
 # opexp → exp | VOID
 # bodyorstm → body | stm
 # exp → exp + exp | exp - exp | exp / exp | exp * exp | exp % exp | exp ++ |exp ** exp | exp -- | exp += exp | exp -= exp | exp *= exp | exp /= exp| exp %= exp | exp == exp | exp === exp | exp != exp | exp !== exp | exp > exp | exp < exp | exp <= exp | exp >= exp | exp && exp | exp || exp | !exp | exp ? exp : exp | call | assign | INTEIRO | FLOAT | ID | TRUE | FALSE | vardecl | STRING

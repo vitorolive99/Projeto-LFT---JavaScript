@@ -1,3 +1,4 @@
+from AbstractVisitor import AbstractVisitor
 from ExpressionLanguageSint import *
 
 # global tab
@@ -9,7 +10,7 @@ def blank():
         p = p + ' '
     return p
 
-class Visitor():
+class Visitor(AbstractVisitor):
 
     def visitProgramFuncDecl(self, program):
         program.funcdecl.accept(self)
@@ -278,7 +279,7 @@ class Visitor():
 
     def visitNoParamsCall(self, paramsCall):
         print(paramsCall.id)
-        print( '()')
+        print('()')
 
     def visitSingleParams(self, params):
         params.exp.accept(self)

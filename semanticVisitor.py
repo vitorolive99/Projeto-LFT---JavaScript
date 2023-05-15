@@ -1,7 +1,19 @@
-from ExpressionLanguageSint import *
-from visitor import Visitor
+from visitor import *
+import symbolTable as st
 
-class SemanticVisitor():
+def coercion(type1, type2):
+    if (type1 in st.Number and type2 in st.Number):
+        if (type1 == st.FLOAT or type2 == st.FLOAT):
+            return st.FLOAT
+        else:
+            return st.INT
+    else:
+        return None
+
+class SemanticVisitor(AbstractVisitor):
+
+    def __init__(self):
+        self.printer = Visitor()
 
     def visitProgramFuncDecl(self, program):
         program.funcdecl.accept(self)
@@ -18,50 +30,40 @@ class SemanticVisitor():
         program.program.accept(self)
 
     def visitVarDeclID (self, varDeclID):
-        print(varDeclID.type, ' ', end='', sep='')
-        print(varDeclID.id, ' ', end='', sep='')
+        return [varDeclID.type, varDeclID.id]
 
     def visitVarDeclIDExp (self, varDeclIDExp):
-        print(varDeclIDExp.type)
-        print(varDeclIDExp.id)
-        varDeclIDExp.exp.accept(self)
+        return [varDeclIDExp.type, varDeclIDExp.id] + varDeclIDExp.exp.accept(self)
 
     def visitVarDeclIDint (self, varDeclIDint):
-        print(varDeclIDint.type)
-        print(varDeclIDint.id)
-        print(varDeclIDint.int)
+        return [varDeclIDint.type, varDeclIDint.id, varDeclIDint.int]
 
     def visitVarDeclListExp (self, varDeclListExp):
-        print(varDeclListExp.type)
-        print(varDeclListExp.id)
-        varDeclListExp.listexp.accept(self)
+        return [varDeclListExp.type, varDeclListExp.id] + varDeclListExp.listexp.accept(self)
 
     def visitVarDeclIntListExp (self, varDeclIntListExp):
-        print(varDeclIntListExp.type)
-        print(varDeclIntListExp.id)
-        print(varDeclIntListExp.int)
-        varDeclIntListExp.listexp.accept(self)
-
+        return [varDeclIntListExp.type, varDeclIntListExp.id, varDeclIntListExp.int] + varDeclIntListExp.listexp.accept(self)
+    
     def visitfuncDeclSignatureBody(self, signatureBody):
         signatureBody.signature.accept(self)
         signatureBody.body.accept(self)
 
     def visitSignatureIDsigParams(self, signatureIDSigParams):
-        print(signatureIDSigParams.id)
-        signatureIDSigParams.sigParams.accept(self)
+        return [signatureIDSigParams.id] + signatureIDSigParams.sigParams.accept(self)	
 
     def visitSingleSigParams(self, singleSigParams):
-        print(singleSigParams.id)
+        return [singleSigParams.id]
 
     def visitCompoundSigParams (self, compoundSigParams):
-        print(compoundSigParams.id)
-        compoundSigParams.sigParams.accept(self)
+        return [compoundSigParams.id] + compoundSigParams.sigParams.accept(self)
 
     def visitbodystms(self, bodystms):
-        bodystms.stms.accept(self)
+        if bodystms.stms != None:
+            bodystms.stms.accept(self)
 
     def visitBodyOrStm(self, bodyOrStm):
-        bodyOrStm.body.accept(self)
+        if bodyOrStm.body != None:
+            bodyOrStm.body.accept(self)
 
     def visitBodyOrStmStm(self, bodyOrStm):
         bodyOrStm.stm.accept(self)
@@ -80,11 +82,24 @@ class SemanticVisitor():
         stmVarDecl.vardecl.accept(self)
 
     def visitStmWhile(self, stmWhile):
-        stmWhile.exp.accept(self)
-        stmWhile.bodyorstm.accept(self)
+        type = stmWhile.exp.accept(self)
+        if (type == None):
+            stmWhile.exp.accept(self.printer)
+            print ("\n\t[Erro] A expressao ", end='')
+            stmWhile.exp.accept(self.printer)
+            print(" eh", type, end='')
+            print (". Deveria ser boolean\n")
+        stmWhile.block.accept(self)
 
     def visitReturn(self, Return):
-        Return.exp.accept(self)
+        typeExp = Return.exp.accept(self)
+        scope = st.symbolTable[-1][st.SCOPE]
+        bindable = st.getBindable(scope)
+        if (typeExp != bindable[st.TYPE]):
+            Return.accept(self.printer)
+            print('\t[Erro] O retorno da funcao', scope, 'eh do tipo', bindable[st.TYPE],end='')
+            print(' no entanto, o retorno passado foi do tipo', typeExp, '\n')
+        st.endScope()
 
     def visitStmIf(self, stmIf):
         stmIf.exp.accept(self)
@@ -101,150 +116,316 @@ class SemanticVisitor():
         stmFor.exp3.accept(self)
         stmFor.bodyorstm.accept(self)
 
-    def visitSomaExp(self, somaExp):
-        somaExp.exp1.accept(self)
-        print('+')
-        somaExp.exp2.accept(self)
+    def visitSomaExp(self, somaExp): #feito
+        tipoexp1 = somaExp.exp1.accept(self)
+        tipoexp2 = somaExp.exp2.accept(self)
+        c = coercion(tipoexp1, tipoexp2)
+        if (c == None):
+            somaExp.accept(self.printer)
+            print('\n\t[Erro] Soma invalida. A expressao ', end='')
+            somaExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            somaExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+        return c
 
-    def visitSubExp(self, subExp):
-        subExp.exp1.accept(self)
-        print('-')
-        subExp.exp2.accept(self)
+    def visitSubExp(self, subExp): #feito
+        tipoexp1 = subExp.exp1.accept(self)
+        tipoexp2 = subExp.exp2.accept(self)
+        c = coercion(tipoexp1, tipoexp2)
+        if (c == None):
+            subExp.accept(self.printer)
+            print('\n\t[Erro] Subtracao invalida. A expressao ', end='')
+            subExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            subExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+        return c
 
-    def visitMulExp(self, mulExp):
-        mulExp.exp1.accept(self)
-        print('*')
-        mulExp.exp2.accept(self)
+    def visitMulExp(self, mulExp): #feito
+        tipoexp1 = mulExp.exp1.accept(self)
+        tipoexp2 = mulExp.exp2.accept(self)
+        c = coercion(tipoexp1, tipoexp2)
+        if (c == None):
+            mulExp.accept(self.printer)
+            print('\n\t[Erro] Multiplicacao invalida. A expressao ', end='')
+            mulExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            mulExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+        return c
 
-    def visitDivExp(self, divExp):
-        divExp.exp1.accept(self)
-        print('/')
-        divExp.exp2.accept(self)
+    def visitDivExp(self, divExp):  #feito
+        tipoexp1 = divExp.exp1.accept(self)
+        tipoexp2 = divExp.exp2.accept(self)
+        c = coercion(tipoexp1, tipoexp2)
+        if (c == None):
+            divExp.accept(self.printer)
+            print('\n\t[Erro] Divisao invalida. A expressao ', end='')
+            divExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            divExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+        return c
 
-    def visitRestoExp(self, restoExp):
-        restoExp.exp1.accept(self)
-        print('%')
-        restoExp.exp2.accept(self)
+    def visitRestoExp(self, restoExp): #feito   
+        tipoexp1 = restoExp.exp1.accept(self)
+        tipoexp2 = restoExp.exp2.accept(self)
+        c = coercion(tipoexp1, tipoexp2)
+        if (c == None):
+            restoExp.accept(self.printer)
+            print('\n\t[Erro] Resto invalido. A expressao ', end='')
+            restoExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            restoExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+        return c
 
-    def visitIncrementoExp(self, incrementoExp):
-        incrementoExp.exp.accept(self)
-        print('++')
+    def visitIncrementoExp(self, incrementoExp): #feito
+        tipoexp = incrementoExp.exp.accept(self)
+        if (tipoexp not in st.Number):
+            incrementoExp.accept(self.printer)
+            print('\n\t[Erro] Incremento invalido. A expressao ', end='')
+            incrementoExp.exp.accept(self.printer)
+            print(' eh do tipo', tipoexp,'\n')
+            return None
+        return tipoexp
 
-    def visitDecrementoExp(self, decrementoExp):
-        decrementoExp.exp.accept(self)
-        print('--')
+    def visitDecrementoExp(self, decrementoExp): #feito
+        tipoexp = decrementoExp.exp.accept(self)
+        if (tipoexp not in st.Number):
+            decrementoExp.accept(self.printer)
+            print('\n\t[Erro] Decremento invalido. A expressao ', end='')
+            decrementoExp.exp.accept(self.printer)
+            print(' eh do tipo', tipoexp,'\n')
+            return None
+        return tipoexp
 
-    def visitExponencialExp(self, exponencialExp):
-        exponencialExp.exp1.accept(self)
-        print('**')
-        exponencialExp.exp2.accept(self)
+    def visitExponencialExp(self, exponencialExp): #feito
+        tipoexp1 = exponencialExp.exp1.accept(self)
+        tipoexp2 = exponencialExp.exp2.accept(self)
+        c = coercion(tipoexp1, tipoexp2)
+        if (c == None):
+            exponencialExp.accept(self.printer)
+            print('\n\t[Erro] Exponencial invalido. A expressao ', end='')
+            exponencialExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            exponencialExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+        return c
 
-    def visitIncrementNExp(self, incrementNExp):
-        incrementNExp.exp1.accept(self)
-        print('+=')
-        incrementNExp.exp2.accept(self)
+    def visitIncrementNExp(self, incrementNExp): #feito
+        tipoexp1 = incrementNExp.exp1.accept(self)
+        tipoexp2 = incrementNExp.exp2.accept(self)
+        c = coercion(tipoexp1, tipoexp2)
+        if (c == None):
+            incrementNExp.accept(self.printer)
+            print('\n\t[Erro] Incremento invalido. A expressao ', end='')
+            incrementNExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            incrementNExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+        return c
 
-    def visitDecrementNExp(self, decrementNExp):
-        decrementNExp.exp1.accept(self)
-        print('-=')
-        decrementNExp.exp2.accept(self)
+    def visitDecrementNExp(self, decrementNExp): #feito
+        tipoexp1 = decrementNExp.exp1.accept(self)
+        tipoexp2 = decrementNExp.exp2.accept(self)
+        c = coercion(tipoexp1, tipoexp2)
+        if (c == None):
+            decrementNExp.accept(self.printer)
+            print('\n\t[Erro] Decremento invalido. A expressao ', end='')
+            decrementNExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            decrementNExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+        return c
 
-    def visitMultIncrementoExp(self, multIncrementoExp):
-        multIncrementoExp.exp1.accept(self)
-        print('*=')
-        multIncrementoExp.exp2.accept(self)
+    def visitMultIncrementoExp(self, multIncrementoExp): #feito
+        tipoexp1 = multIncrementoExp.exp1.accept(self)
+        tipoexp2 = multIncrementoExp.exp2.accept(self)
+        c = coercion(tipoexp1, tipoexp2)
+        if (c == None):
+            multIncrementoExp.accept(self.printer)
+            print('\n\t[Erro] Multiplicacao invalida. A expressao ', end='')
+            multIncrementoExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            multIncrementoExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+        return c
 
-    def visitDivIncrementoExp(self, divIncrementoExp):
-        divIncrementoExp.exp1.accept(self)
-        print('/=')
-        divIncrementoExp.exp2.accept(self)
+    def visitDivIncrementoExp(self, divIncrementoExp): #feito
+        tipoexp1 = divIncrementoExp.exp1.accept(self)
+        tipoexp2 = divIncrementoExp.exp2.accept(self)
+        c = coercion(tipoexp1, tipoexp2)
+        if (c == None):
+            divIncrementoExp.accept(self.printer)
+            print('\n\t[Erro] Divisao invalida. A expressao ', end='')
+            divIncrementoExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            divIncrementoExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+        return c
 
-    def visitRestoIncrementoExp(self, restoIncrementoExp):
-        restoIncrementoExp.exp1.accept(self)
-        print('%=')
-        restoIncrementoExp.exp2.accept(self)
+    def visitRestoIncrementoExp(self, restoIncrementoExp): #feito
+        tipoexp1 = restoIncrementoExp.exp1.accept(self)
+        tipoexp2 = restoIncrementoExp.exp2.accept(self)
+        c = coercion(tipoexp1, tipoexp2)
+        if (c == None):
+            restoIncrementoExp.accept(self.printer)
+            print('\n\t[Erro] Resto invalido. A expressao ', end='')
+            restoIncrementoExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            restoIncrementoExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+        return c
 
-    def visitIgualExp(self, igualExp):
-        igualExp.exp1.accept(self)
-        print('==')
-        igualExp.exp2.accept(self)
+    def visitIgualExp(self, igualExp): #feito, EU ACHO
+        tipoexp1 = igualExp.exp1.accept(self)
+        tipoexp2 = igualExp.exp2.accept(self)
+        if (tipoexp1 != tipoexp2):
+            igualExp.accept(self.printer)
+            print('\n\t[Erro] Igualdade invalida. A expressao ', end='')
+            igualExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            igualExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+            return None
+        return tipoexp1
 
-    def visitigualpracaraiExp(self, igualpracaraiExp):
-        igualpracaraiExp.exp1.accept(self)
-        print('===')
-        igualpracaraiExp.exp2.accept(self)
+    def visitigualpracaraiExp(self, igualpracaraiExp): #feito, EU ACHO
+        tipoexp1 = igualpracaraiExp.exp1.accept(self)
+        tipoexp2 = igualpracaraiExp.exp2.accept(self)
+        if (tipoexp1 != tipoexp2):
+            igualpracaraiExp.accept(self.printer)
+            print('\n\t[Erro] Igualdade invalida. A expressao ', end='')
+            igualpracaraiExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            igualpracaraiExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+            return None
+        return tipoexp1
 
-    def visitDiferenteExp(self, diferenteExp):
-        diferenteExp.exp1.accept(self)
-        print('!=')
-        diferenteExp.exp2.accept(self)
+    def visitDiferenteExp(self, diferenteExp): #feito, EU ACHO
+        tipoexp1 = diferenteExp.exp1.accept(self)
+        tipoexp2 = diferenteExp.exp2.accept(self)
+        if (tipoexp1 != tipoexp2):
+            diferenteExp.accept(self.printer)
+            print('\n\t[Erro] Diferenca invalida. A expressao ', end='')
+            diferenteExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            diferenteExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+            return None
+        return tipoexp1
 
-    def visitdiferentepracaraiExp(self, diferentepracaraiExp):
-        diferentepracaraiExp.exp1.accept(self)
-        print('!==')
-        diferentepracaraiExp.exp2.accept(self)
+    def visitdiferentepracaraiExp(self, diferentepracaraiExp): #feito, EU ACHO
+        tipoexp1 = diferentepracaraiExp.exp1.accept(self)
+        tipoexp2 = diferentepracaraiExp.exp2.accept(self)
+        if (tipoexp1 != tipoexp2):
+            diferentepracaraiExp.accept(self.printer)
+            print('\n\t[Erro] Diferenca invalida. A expressao ', end='')
+            diferentepracaraiExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            diferentepracaraiExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+            return None
+        return tipoexp1
 
-    def visitMaiorQExp(self, maiorQExp):
-        maiorQExp.exp1.accept(self)
-        print('>')
-        maiorQExp.exp2.accept(self)
+    def visitMaiorQExp(self, maiorQExp): #feito, EU ACHO
+        tipoexp1 = maiorQExp.exp1.accept(self)
+        tipoexp2 = maiorQExp.exp2.accept(self)
+        if (tipoexp1 != tipoexp2):
+            maiorQExp.accept(self.printer)
+            print('\n\t[Erro] Maior que invalido. A expressao ', end='')
+            maiorQExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            maiorQExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+            return None
+        return tipoexp1
 
-    def visitMaiorIgualQExp(self, maiorIgualQExp):
-        maiorIgualQExp.exp1.accept(self)
-        print('>=')
-        maiorIgualQExp.exp2.accept(self)
+    def visitMaiorIgualQExp(self, maiorIgualQExp): #feito, EU ACHO
+        tipoexp1 = maiorIgualQExp.exp1.accept(self)
+        tipoexp2 = maiorIgualQExp.exp2.accept(self)
+        if (tipoexp1 != tipoexp2):
+            maiorIgualQExp.accept(self.printer)
+            print('\n\t[Erro] Maior igual que invalido. A expressao ', end='')
+            maiorIgualQExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            maiorIgualQExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+            return None
+        return tipoexp1
 
     def visitMenorQExp(self, menorQExp):
-        menorQExp.exp1.accept(self)
-        print('<')
-        menorQExp.exp2.accept(self)
+        tipoexp1 = menorQExp.exp1.accept(self)
+        tipoexp2 = menorQExp.exp2.accept(self)
+        if (tipoexp1 != tipoexp2):
+            menorQExp.accept(self.printer)
+            print('\n\t[Erro] Menor que invalido. A expressao ', end='')
+            menorQExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            menorQExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+            return None
+        return tipoexp1
 
     def visitMenorIgualQExp(self, menorIgualQExp):
-        menorIgualQExp.exp1.accept(self)
-        print('<=')
-        menorIgualQExp.exp2.accept(self)
+        tipoexp1 = menorIgualQExp.exp1.accept(self)
+        tipoexp2 = menorIgualQExp.exp2.accept(self)
+        if (tipoexp1 != tipoexp2):
+            menorIgualQExp.accept(self.printer)
+            print('\n\t[Erro] Menor igual que invalido. A expressao ', end='')
+            menorIgualQExp.exp1.accept(self.printer)
+            print(' eh do tipo', tipoexp1, 'enquanto a expressao ', end='')
+            menorIgualQExp.exp2.accept(self.printer)
+            print(' eh do tipo', tipoexp2,'\n')
+            return None
+        return tipoexp1
 
-    def visitAndExp(self, andExp):
+    def visitAndExp(self, andExp): #feito, EU ACHO
         andExp.exp1.accept(self)
-        print('&&')
         andExp.exp2.accept(self)
 
-    def visitOrExp(self, orExp):
+    def visitOrExp(self, orExp): #feito, EU ACHO
         orExp.exp1.accept(self)
-        print('||')
         orExp.exp2.accept(self)
+        
 
-    def visitNotExp(self, notExp):
-        print('!')
+    def visitNotExp(self, notExp): #feito, EU ACHO
         notExp.exp.accept(self)
 
-    def visitTernarioExp(self, ternarioExp):
+    def visitTernarioExp(self, ternarioExp): #feito, EU ACHO
         ternarioExp.exp1.accept(self)
-        print('?')
         ternarioExp.exp2.accept(self)
-        print(':')
         ternarioExp.exp3.accept(self)
 
-    def visitAssignExp(self, assignExp):
+    def visitAssignExp(self, assignExp): #feito, EU ACHO
         assignExp.assign.accept(self)
 
-    def visitInteiroExp(self, iteiroExp):
-        print(iteiroExp.inteiro)
+    def visitInteiroExp(self, inteiroExp): #feito
+        if (isinstance(inteiroExp.inteiro, int)):
+            return st.INT
+        
+    def visitRealExp(self, realExp): #feito
+        if (isinstance(realExp.real, float)):
+            return st.FLOAT
+        
+    def visitIdExp(self, idExp): #feito
+        idName = st.getBindable(idExp.id)
+        if (idName != None):
+            return idName[st.TYPE]
+        return None
 
-    def visitRealExp(self, realExp):
-        print(realExp.real)
+    def visitStringExp(self, stringExp): #feito, EU ACHO
+        if (isinstance(stringExp.string, str)):
+            return st.STRING
 
-    def visitIdExp(self, idExp):
-        print(idExp.id)
-
-    def visitStringExp(self, stringExp):
-        stringExp.string.accept(self)
-
-    def visitCallExp(self, callExp):
+    def visitCallExp(self, callExp): #feito
         callExp.id.accept(self)
 
-    def visitBooleanExp(self, booleanExp):
-        print(booleanExp.booleanValue)
+    def visitBooleanExp(self, booleanExp): #feito
+        return st.BOOL
 
     def visitExpOpexp( self, expOpexp):
         expOpexp.exp.accept(self)
@@ -257,32 +438,47 @@ class SemanticVisitor():
         print(',')
         listexp.listexp.accept(self)
 
-    def visitParamsCall(self, paramsCall):
-        print(paramsCall.id)
-        paramsCall.params.accept(self)
+    def visitParamsCall(self, paramsCall): #feito
+        bindable = st.getBindable(paramsCall.id)
+        if (bindable != None and bindable[st.BINDABLE] == st.FUNCTION):
+            typeParams = paramsCall.params.accept(self)
+            if (list(bindable[st.PARAMS][1::2]) == typeParams):
+                return bindable[st.TYPE]
+            paramsCall.accept(self.printer)
+            print("\n\t[Erro] Chamada de funcao invalida. Tipos passados na chamada sao:", typeParams)
+            print('\tenquanto que os tipos definidos no metodo sao:', bindable[st.PARAMS][1::2], '\n')
+        else:
+            paramsCall.accept(self.printer)
+            print("\n\t[Erro] Chamada de funcao invalida. O id", paramsCall.id,
+                  "nao eh de uma funcao, nao foi definido ou foi definido apos esta funcao\n")
+        return None
 
-    def visitNoParamsCall(self, paramsCall):
-        print(paramsCall.id)
-        print( '()')
+    def visitNoParamsCall(self, simpleCall): #feito
+        bindable = st.getBindable(simpleCall.id)
+        if (bindable != None and bindable[st.BINDABLE] == st.FUNCTION):
+            return bindable[st.TYPE]
+        simpleCall.accept(self.printer)
+        print("\n\t[Erro] Chamada de funcao invalida. O id", simpleCall.id, "nao eh de uma funcao, nao foi definido ou foi definido apos esta funcao\n")
+        return None
 
-    def visitSingleParams(self, params):
-        params.exp.accept(self)
+    def visitSingleParams(self, params): #feito
+        return [params.exp.accept(self)]
+    
+    def visitCompoundParams(self, params): #feito
+        return [params.exp.accept(self)] + params.params.accept(self)
 
-    def visitCompoundParams(self, params):
-        params.exp.accept(self)
-        print(', ')
-        params.params.accept(self)
-
-    def visitAssignAssign(self, assign):
-        print(assign.id)
-        print('=')
-        assign.exp.accept(self)
+    def visitAssignAssign(self, assign): #feito
+        typeVar = assign.exp2.accept(self)
+        if(isinstance(assign.exp1, sa.IdExp)):
+            st.addVar(assign.exp1.id, typeVar)
+            return typeVar
+        return None
 
     def visittipodecl(self, tipodecl):
-        print(tipodecl.tipo)
+        return tipodecl.type
 
     def visitstring(self, string):
-        print(string.string)
+        return string.string
 
     
     

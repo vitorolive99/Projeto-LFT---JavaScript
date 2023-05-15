@@ -71,10 +71,6 @@ class AbstractVisitor(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def visitBody(self, body):
-        pass
-
-    @abstractmethod
     def visitBodyStms(self, bodyStms):
         pass
 
@@ -312,10 +308,6 @@ class AbstractVisitor(metaclass=ABCMeta):
 
     @abstractmethod
     def visitCompoundParams (self, compoundParams):
-        pass
-
-    @abstractmethod
-    def visitAssign (self, assign):
         pass
 
     @abstractmethod
