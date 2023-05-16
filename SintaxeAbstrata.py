@@ -58,7 +58,7 @@ class varDeclIDexp(varDecl):
         self.exp = exp
 
     def accept(self, visitor):
-        return visitor.visitVarDeclIDexp(self)
+        return visitor.visitVarDeclIDExp(self)
     
 class varDeclIDint(varDecl):
     def __init__(self, type, id, int):

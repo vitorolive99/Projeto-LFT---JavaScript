@@ -505,8 +505,9 @@ if __name__ == "__main__":
     }
     '''
 
+    f = open("data2.txt", "r")
     lexer = lex.lex()
-    lexer.input(data2)
+    lexer.input(f.read())
     parser = yacc.yacc()
     parser.parse(debug=False)
     print("#imprime o programa que foi passado como entrada")

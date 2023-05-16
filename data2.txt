@@ -1,16 +1,16 @@
-function somarNumerosPares(array) {
+int somarNumerosPares(array) {
   var soma = 'xxx';
   var indice = 0;
 
-  while (indice < arraylength) {
+  while (indice < true){
     var numero = 5 ;
 
     if (numero % 2 == 0) {
-      soma += numero; //erro aqui
+      soma += 'ddd'; 
     }
 
     indice++;
   }
 
-  return soma;
+  return soma + true;
 }

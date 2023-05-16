@@ -7,19 +7,7 @@ class AbstractVisitor(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def visitProgramVarDecl(self, program):
-        pass
-
-    @abstractmethod
     def visitProgramFuncDeclProgram(self, program):
-        pass
-
-    @abstractmethod
-    def visitProgramVarDeclProgram(self, program):
-        pass
-
-    @abstractmethod
-    def visitVarDecl(self, varDecl):
         pass
 
     @abstractmethod
@@ -43,23 +31,7 @@ class AbstractVisitor(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def visitFuncDecl(self, funcDecl):
-        pass
-
-    @abstractmethod
-    def visitFuncDeclSignatureBody(self, funcDeclSignatureBody):
-        pass
-
-    @abstractmethod
-    def visitSignature(self, signature):
-        pass
-
-    @abstractmethod
     def visitSignatureIDsigParams(self, signatureIDSigParams):
-        pass
-
-    @abstractmethod
-    def visitSigParams(self, sigParams):
         pass
 
     @abstractmethod
@@ -71,23 +43,11 @@ class AbstractVisitor(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def visitBodyStms(self, bodyStms):
-        pass
-
-    @abstractmethod
-    def visitBodyStm(self, bodyStm):
-        pass
-
-    @abstractmethod
     def visitBodyOrStm(self, bodyOrStm):
         pass
 
     @abstractmethod
     def visitBodyOrStmStm(self, bodyOrStmStm):
-        pass
-
-    @abstractmethod
-    def visitStms(self, stms):
         pass
 
     @abstractmethod
@@ -99,23 +59,11 @@ class AbstractVisitor(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def visitStm (self, stm):
-        pass
-
-    @abstractmethod
-    def visitStmVarDecl (self, stmVarDecl):
-        pass
-
-    @abstractmethod
     def visitStmExp (self, stmExp):
         pass
 
     @abstractmethod
     def visitStmWhile (self, stmWhile):
-        pass
-
-    @abstractmethod
-    def visitStmReturn (self, stmReturn):
         pass
 
     @abstractmethod
@@ -128,10 +76,6 @@ class AbstractVisitor(metaclass=ABCMeta):
 
     @abstractmethod
     def visitStmFor (self, stmFor):
-        pass
-
-    @abstractmethod
-    def visitExp (self, exp):
         pass
 
     @abstractmethod
@@ -191,15 +135,7 @@ class AbstractVisitor(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def visitIgualPraCaraiExp (self, igualPraCaraiExp):
-        pass
-
-    @abstractmethod
     def visitDiferenteExp (self, diferenteExp):
-        pass
-
-    @abstractmethod
-    def visitDiferePraCaraiExp (self, diferePraCaraiExp):
         pass
 
     @abstractmethod
@@ -255,39 +191,7 @@ class AbstractVisitor(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def visitTrueExp (self, trueExp):
-        pass
-
-    @abstractmethod
-    def visitFalseExp (self, falseExp):
-        pass
-
-    @abstractmethod
-    def visitOpexp (self, opexp):
-        pass
-
-    @abstractmethod
     def visitExpOpexp (self, expOpexp):
-        pass
-    
-    @abstractmethod
-    def visitVoidOpexp (self, voidOpexp):
-        pass
-
-    @abstractmethod
-    def visitListExp (self, listExp):
-        pass
-
-    @abstractmethod
-    def visitSingleListExp (self, singleListExp):
-        pass
-
-    @abstractmethod
-    def visitCompoundListExp (self, compoundListExp):
-        pass
-
-    @abstractmethod
-    def visitCall (self, call):
         pass
 
     @abstractmethod
@@ -296,10 +200,6 @@ class AbstractVisitor(metaclass=ABCMeta):
 
     @abstractmethod
     def visitNoParamsCall (self, noParamsCall):
-        pass
-
-    @abstractmethod
-    def visitParams (self, params):
         pass
 
     @abstractmethod
