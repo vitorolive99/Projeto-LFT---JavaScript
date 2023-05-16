@@ -1,16 +1,10 @@
-function somarNumerosPares(array) {
-  var soma = 'xxx';
-  var indice = 0;
+var fatorial = calcularFatorial(contador);
+consolelog('Fatorial de', contador, ':', fatorial);
 
-  while (indice < arraylength) {
-    var numero = 5 ;
+contador++;
 
-    if (numero % 2 == 0) {
-      soma += numero; //erro aqui
-    }
-
-    indice++;
-  }
-
-  return soma;
+if (contador <= 5) {
+  consolelog('Contador é menor ou igual a 5');
+} else {
+  consolelog('Contador é maior do que 5');
 }

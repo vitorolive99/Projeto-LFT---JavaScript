@@ -6,9 +6,8 @@
 # sigparams → ID |  ID , sigparams
 # body → { stms }
 # stms → stm | stm stms
-# stm → exp ; | while ( exp ) bodyorstm | return exp ; | if ( exp ) bodyorstm | if ( exp ) bodyorstm else bodyorstm | for ( opexp;opexp;opexp ) bodyorstm 
+# stm → exp ; | while ( exp ) body | return exp ; | if ( exp ) body | if ( exp ) body else body | for ( opexp;opexp;opexp ) body 
 # opexp → exp | VOID
-# bodyorstm → body | stm
 # exp → exp + exp | exp - exp | exp / exp | exp * exp | exp % exp | exp ++ |exp ** exp | exp -- | exp += exp | exp -= exp | exp *= exp | exp /= exp| exp %= exp | exp == exp | exp === exp | exp != exp | exp !== exp | exp > exp | exp < exp | exp <= exp | exp >= exp | exp && exp | exp || exp | !exp | exp ? exp : exp | call | assign | INTEIRO | FLOAT | ID | TRUE | FALSE | vardecl | STRING
 # call → ID (params) | ID ( )
 # params → exp, params | exp
@@ -41,15 +40,15 @@ def p_program(p):
 
 def p_program1(p):
     '''program : funcdecl program'''
-    p[0] = sa.programFuncDeclProgram(p[1], p[2])
+    p[0] = [sa.programFuncDeclProgram(p[1], p[2])]
 
 def p_program2(p):
     '''program : stms'''
-    p[0] = sa.programStms(p[1])
+    p[0] = [sa.programStms(p[1])]
 
 def p_program3(p):
     '''program : stms program'''
-    p[0] = sa.programStmsProgram(p[1], p[2])
+    p[0] = [sa.programStmsProgram(p[1], p[2])]
 
 def p_vardecl(p):
     '''vardecl : tipodecl ID
@@ -110,19 +109,19 @@ def p_stm1(p):
     p[0] = sa.StmExp(p[1])
 
 def p_stmWhile(p):
-    '''stm : WHILE LPAREN exp RPAREN bodyorstm'''
+    '''stm : WHILE LPAREN exp RPAREN body'''
     p[0] = sa.StmWhile(p[3], p[5])
 
 def p_stmFor(p):
-    '''stm : FOR LPAREN opexp PV opexp PV opexp RPAREN bodyorstm'''
+    '''stm : FOR LPAREN opexp PV opexp PV opexp RPAREN body'''
     p[0] = sa.StmFor(p[3], p[5], p[7], p[9])
 
 def p_stmIfElse(p):
-    '''stm : IF LPAREN exp RPAREN bodyorstm ELSE bodyorstm'''
+    '''stm : IF LPAREN exp RPAREN body ELSE body'''
     p[0] = sa.StmIfElse(p[3], p[5], p[7])
 
 def p_opexpIf(p):
-    '''stm : IF LPAREN exp RPAREN bodyorstm'''
+    '''stm : IF LPAREN exp RPAREN body'''
     p[0] = sa.StmIf(p[3], p[5])
 
 def p_opexp(p):
@@ -132,19 +131,9 @@ def p_opexp(p):
         p[0] = sa.ExpOpexp(p[1])
     else:
         p[0] = sa.ExpOpexp(None)
-    
-
-def p_bodyorstm(p):
-    '''bodyorstm : body
-                 | stm'''
-    if isinstance(p[1], sa.body):
-        p[0] = sa.BodyOrStm(p[1])
-    else:
-        p[0] = sa.BodyOrStmStm(p[1])
-
 
 def p_expVardecl(p):
-    '''exp : vardecl'''
+    '''exp : vardecl '''
     p[0] = sa.ExpVarDecl(p[1])
 
 def p_expSoma(p):

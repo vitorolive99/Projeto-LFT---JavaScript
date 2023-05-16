@@ -155,24 +155,7 @@ class bodystms(body):
     def accept(self, visitor):
         return visitor.visitbodystms(self)
 
-class bodystm(metaclass=ABCMeta):
-    @abstractmethod
-    def accept(self, visitor):
-        pass
-    
-class BodyOrStm(body):
-    def __init__(self, body):
-        self.body = body
 
-    def accept(self, visitor):
-        return visitor.visitBodyOrStm(self)
-
-class BodyOrStmStm(body):
-    def __init__(self, stm):
-        self.stm = stm
-
-    def accept(self, visitor):
-        return visitor.visitBodyOrStmStm(self)
 '''comandos'''
 
 class stms(metaclass=ABCMeta):
@@ -210,9 +193,9 @@ class StmExp(stm):
         return visitor.visitStmExp(self)
 
 class StmWhile(stm):
-    def __init__(self, exp, bodyorstm):
+    def __init__(self, exp, body):
         self.exp = exp
-        self.bodyorstm = bodyorstm
+        self.body = body
 
     def accept(self, visitor):
         return visitor.visitStmWhile(self)
@@ -224,26 +207,26 @@ class StmReturn(stm):
         return visitor.visitReturn(self) 
     
 class StmIf(stm):
-    def __init__(self, exp, bodyorstm):
+    def __init__(self, exp, body):
         self.exp = exp
-        self.bodyorstm = bodyorstm
+        self.body = body
 
     def accept(self, visitor):
         return visitor.visitStmIf(self)
 class StmIfElse(stm):
-    def __init__(self, exp, bodyorstm1, bodyorstm2):
+    def __init__(self, exp, body1, body2):
         self.exp = exp
-        self.bodyorstm1 = bodyorstm1
-        self.bodyorstm2 = bodyorstm2
+        self.body = body1
+        self.body2 = body2
 
     def accept(self, visitor):
         return visitor.visitStmIfElse(self)
 class StmFor(stm):
-    def __init__(self, exp1, exp2, exp3, bodyorstm):
+    def __init__(self, exp1, exp2, exp3, body):
         self.exp1 = exp1
         self.exp2 = exp2
         self.exp3 = exp3
-        self.bodyorstm = bodyorstm
+        self.body = body
 
     def accept(self, visitor):
         return visitor.visitStmFor(self)

@@ -43,14 +43,6 @@ class AbstractVisitor(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def visitBodyOrStm(self, bodyOrStm):
-        pass
-
-    @abstractmethod
-    def visitBodyOrStmStm(self, bodyOrStmStm):
-        pass
-
-    @abstractmethod
     def visitSingleStm (self, singleStm):
         pass
 

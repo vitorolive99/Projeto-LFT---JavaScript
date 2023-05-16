@@ -1,4 +1,4 @@
-int somarNumerosPares(array) {
+function somarNumerosPares(array) {
   var soma = 'xxx';
   var indice = 0;
 

@@ -33,7 +33,7 @@ class SemanticVisitor(AbstractVisitor):
         return [varDeclID.type, varDeclID.id]
 
     def visitVarDeclIDExp (self, varDeclIDExp):
-        return [varDeclIDExp.type, varDeclIDExp.id] + varDeclIDExp.exp.accept(self)
+        return [varDeclIDExp.type, varDeclIDExp.id, varDeclIDExp.exp.accept(self)]
 
     def visitVarDeclIDint (self, varDeclIDint):
         return [varDeclIDint.type, varDeclIDint.id, varDeclIDint.int]
@@ -49,7 +49,7 @@ class SemanticVisitor(AbstractVisitor):
         signatureBody.body.accept(self)
 
     def visitSignatureIDsigParams(self, signatureIDSigParams):
-        return [signatureIDSigParams.id] + signatureIDSigParams.sigParams.accept(self)	
+        pass
 
     def visitSingleSigParams(self, singleSigParams):
         return [singleSigParams.id]
@@ -87,9 +87,8 @@ class SemanticVisitor(AbstractVisitor):
             stmWhile.exp.accept(self.printer)
             print ("\n\t[Erro] A expressao ", end='')
             stmWhile.exp.accept(self.printer)
-            print(" eh", type, end='')
-            print (". Deveria ser boolean\n")
-        stmWhile.block.accept(self)
+            print(" eh invalida")
+        stmWhile.bodyorstm.accept(self)
 
     def visitReturn(self, Return):
         typeExp = Return.exp.accept(self)
@@ -102,7 +101,12 @@ class SemanticVisitor(AbstractVisitor):
         st.endScope()
 
     def visitStmIf(self, stmIf):
-        stmIf.exp.accept(self)
+        type = stmIf.exp.accept(self)
+        if (type == None):
+            stmIf.exp.accept(self.printer)
+            print ("\n\t[Erro] A expressao ", end='')
+            stmIf.exp.accept(self.printer)
+            print(" eh invalida")
         stmIf.bodyorstm.accept(self)
 
     def visitStmIfElse(self, stmIfElse):
@@ -115,6 +119,9 @@ class SemanticVisitor(AbstractVisitor):
         stmFor.exp2.accept(self)
         stmFor.exp3.accept(self)
         stmFor.bodyorstm.accept(self)
+
+    def visitExpVardecl(self, expVardecl):
+        expVardecl.varDecl.accept(self)
 
     def visitSomaExp(self, somaExp): #feito
         tipoexp1 = somaExp.exp1.accept(self)
@@ -214,7 +221,7 @@ class SemanticVisitor(AbstractVisitor):
             print(' eh do tipo', tipoexp2,'\n')
         return c
 
-    def visitIncrementNExp(self, incrementNExp): #feito
+    def visitIncrementoNExp(self, incrementNExp): #feito
         tipoexp1 = incrementNExp.exp1.accept(self)
         tipoexp2 = incrementNExp.exp2.accept(self)
         c = coercion(tipoexp1, tipoexp2)
@@ -418,7 +425,7 @@ class SemanticVisitor(AbstractVisitor):
         return None
 
     def visitStringExp(self, stringExp): #feito, EU ACHO
-        if (isinstance(stringExp.string, str)):
+        if (isinstance(stringExp.stringd, str)):
             return st.STRING
 
     def visitCallExp(self, callExp): #feito
@@ -485,30 +492,12 @@ class SemanticVisitor(AbstractVisitor):
 
 if __name__ == "__main__":
 
-    data2 = '''
-    function some (a, b){ 
-        a = 88 + 44; 
-        b = 70; 
-        sumparabola(1, 2, 3); 
-        if (b==70){     
-            while (true){ 
-                c = 38; 
-                sumparabola(5, true, false); 
-                while (c){ 
-                    sumparabola(5, true, true); 
-                } 
-            }
-        } 
-        soma(); 
-        sumparabolac(2); 
-        return true; 
-    }
-    '''
-
     f = open("data2.txt", "r")
     lexer = lex.lex()
     lexer.input(f.read())
     parser = yacc.yacc()
-    parser.parse(debug=False)
+    result = parser.parse(debug=False)
     print("#imprime o programa que foi passado como entrada")
-    visitor = Visitor()
+    svisitor = SemanticVisitor()
+    for r in result:
+        r.accept(svisitor)

@@ -77,12 +77,6 @@ class Visitor(AbstractVisitor):
         tab = tab - 4
         print ('} ')
 
-    def visitBodyOrStm(self, bodyOrStm):
-        bodyOrStm.body.accept(self)
-
-    def visitBodyOrStmStm(self, bodyOrStm):
-        bodyOrStm.stm.accept(self)
-
     def visitSingleStm(self, SingleStm):
         SingleStm.stm.accept(self)
 
@@ -99,7 +93,7 @@ class Visitor(AbstractVisitor):
         print(blank(),'while (', end='', sep='')
         stmWhile.exp.accept(self)
         print(') ', end='', sep='')
-        stmWhile.bodyorstm.accept(self)
+        stmWhile.body.accept(self)
 
     def visitReturn(self, Return):
         print(blank(),'return ', end='', sep='')
@@ -110,15 +104,15 @@ class Visitor(AbstractVisitor):
         print(blank(),'if (', end='', sep='')
         stmIf.exp.accept(self)
         print(') ', end='', sep='')
-        stmIf.bodyorstm.accept(self)
+        stmIf.body.accept(self)
 
     def visitStmIfElse(self, stmIfElse):
         print(blank(),'if (', end='', sep='')
         stmIfElse.exp.accept(self)
         print(') ', end='', sep='')
-        stmIfElse.bodyorstm1.accept(self)
+        stmIfElse.body.accept(self)
         print(blank(),'else ', end='', sep='')
-        stmIfElse.bodyorstm2.accept(self)
+        stmIfElse.body2.accept(self)
 
     def visitStmFor(self, stmFor):
         print(blank(),'for (', end='', sep='')
@@ -128,7 +122,7 @@ class Visitor(AbstractVisitor):
         print('; ', end='', sep='')
         stmFor.exp3.accept(self)
         print(') ', end='', sep='')
-        stmFor.bodyorstm.accept(self)
+        stmFor.body.accept(self)
 
     def visitExpVardecl(self, expVardecl):
         expVardecl.varDecl.accept(self)
@@ -160,7 +154,7 @@ class Visitor(AbstractVisitor):
 
     def visitIncrementoExp(self, incrementoExp):
         incrementoExp.exp.accept(self)
-        print(' ++')
+        print(' ++ ', end='')
 
     def visitIncrementoNExp(self, incrementoNExp):
         incrementoNExp.exp1.accept(self)
@@ -283,7 +277,7 @@ class Visitor(AbstractVisitor):
         callExp.id.accept(self)
 
     def visitBooleanExp(self, booleanExp):
-        print(booleanExp.booleanValue)
+        print(booleanExp.booleanValue, ' ', end='', sep='')
 
     def visitExpOpexp( self, expOpexp):
         expOpexp.exp.accept(self)
@@ -293,13 +287,13 @@ class Visitor(AbstractVisitor):
 
     def CompoundListexp(self, listexp):
         listexp.exp.accept(self)
-        print(',')
+        print(', ', end='')
         listexp.listexp.accept(self)
 
     def visitParamsCall(self, paramsCall):
         print(paramsCall.id, '(', end='', sep='')
         paramsCall.params.accept(self)
-        print(')')
+        print(')', end='')
 
     def visitNoParamsCall(self, paramsCall):
         print(blank(), paramsCall.id, '()',end='', sep='')
@@ -309,7 +303,7 @@ class Visitor(AbstractVisitor):
 
     def visitCompoundParams(self, params):
         params.exp.accept(self)
-        print(', ')
+        print(', ', end='')
         params.params.accept(self)
 
     def visitAssignAssign(self, assign):
@@ -327,26 +321,6 @@ class Visitor(AbstractVisitor):
     
 
 if __name__ == "__main__":
-
-    data2 = '''
-    function some (a, b){ 
-        a = 88 + 44; 
-        b = 70; 
-        sumparabola(1, 2, 3); 
-        if (b==70){     
-            while (true){ 
-                c = 38; 
-                sumparabola(5, true, false); 
-                while (c){ 
-                    sumparabola(5, true, true); 
-                } 
-            }
-        } 
-        soma(); 
-        sumparabolac(2); 
-        return true; 
-    }
-    '''
 
     f = open("data.txt", "r")
     lexer = lex.lex()
