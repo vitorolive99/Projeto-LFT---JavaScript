@@ -213,6 +213,7 @@ class StmIf(stm):
 
     def accept(self, visitor):
         return visitor.visitStmIf(self)
+    
 class StmIfElse(stm):
     def __init__(self, exp, body1, body2):
         self.exp = exp

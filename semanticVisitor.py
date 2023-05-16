@@ -61,13 +61,6 @@ class SemanticVisitor(AbstractVisitor):
         if bodystms.stms != None:
             bodystms.stms.accept(self)
 
-    def visitBodyOrStm(self, bodyOrStm):
-        if bodyOrStm.body != None:
-            bodyOrStm.body.accept(self)
-
-    def visitBodyOrStmStm(self, bodyOrStm):
-        bodyOrStm.stm.accept(self)
-
     def visitSingleStm(self, SingleStm):
         SingleStm.stm.accept(self)
 
@@ -82,43 +75,33 @@ class SemanticVisitor(AbstractVisitor):
         stmVarDecl.vardecl.accept(self)
 
     def visitStmWhile(self, stmWhile):
-        type = stmWhile.exp.accept(self)
-        if (type == None):
-            stmWhile.exp.accept(self.printer)
-            print ("\n\t[Erro] A expressao ", end='')
-            stmWhile.exp.accept(self.printer)
-            print(" eh invalida")
-        stmWhile.bodyorstm.accept(self)
+        typeExp = stmWhile.exp.accept(self)
+        if (typeExp == None):
+            print('\n\t[Erro] Expressao ', stmWhile.exp.accept(self.printer), 'invalida.', end='')
+        stmWhile.body.accept(self)
 
     def visitReturn(self, Return):
-        typeExp = Return.exp.accept(self)
-        scope = st.symbolTable[-1][st.SCOPE]
-        bindable = st.getBindable(scope)
-        if (typeExp != bindable[st.TYPE]):
-            Return.accept(self.printer)
-            print('\t[Erro] O retorno da funcao', scope, 'eh do tipo', bindable[st.TYPE],end='')
-            print(' no entanto, o retorno passado foi do tipo', typeExp, '\n')
-        st.endScope()
+        pass
 
     def visitStmIf(self, stmIf):
-        type = stmIf.exp.accept(self)
-        if (type == None):
-            stmIf.exp.accept(self.printer)
-            print ("\n\t[Erro] A expressao ", end='')
-            stmIf.exp.accept(self.printer)
-            print(" eh invalida")
-        stmIf.bodyorstm.accept(self)
+        typeExp = stmIf.exp.accept(self)
+        if (typeExp == None):
+            print('\n\t[Erro] Expressao ', stmIf.exp.accept(self.printer), 'invalida.', end='')
+        stmIf.body.accept(self)
 
     def visitStmIfElse(self, stmIfElse):
-        stmIfElse.exp.accept(self)
-        stmIfElse.bodyorstm1.accept(self)
-        stmIfElse.bodyorstm2.accept(self)
+        typeExp = stmIfElse.exp.accept(self)
+        if (typeExp == None):
+            print('\n\t[Erro] Expressao ', stmIfElse.exp.accept(self.printer), 'invalida.', end='')
+        stmIfElse.body1.accept(self)
+        stmIfElse.body2.accept(self)
 
     def visitStmFor(self, stmFor):
-        stmFor.exp1.accept(self)
-        stmFor.exp2.accept(self)
-        stmFor.exp3.accept(self)
-        stmFor.bodyorstm.accept(self)
+        typeExp1 = stmFor.exp1.accept(self)
+        typeExp2 = stmFor.exp2.accept(self)
+        typeExp3 = stmFor.exp3.accept(self)
+        if (typeExp1 == None or typeExp2 == None or typeExp3 == None):
+            print('\n\t[Erro] Uma das expressoes esta incorreta ', stmFor.exp1.accept(self.printer),stmFor.exp2.accept(self.printer), stmFor.exp3.accept(self.printer), 'invalida.', end='')
 
     def visitExpVardecl(self, expVardecl):
         expVardecl.varDecl.accept(self)
@@ -190,7 +173,7 @@ class SemanticVisitor(AbstractVisitor):
 
     def visitIncrementoExp(self, incrementoExp): #feito
         tipoexp = incrementoExp.exp.accept(self)
-        if (tipoexp not in st.Number):
+        if (tipoexp != st.Number):
             incrementoExp.accept(self.printer)
             print('\n\t[Erro] Incremento invalido. A expressao ', end='')
             incrementoExp.exp.accept(self.printer)
@@ -446,27 +429,10 @@ class SemanticVisitor(AbstractVisitor):
         listexp.listexp.accept(self)
 
     def visitParamsCall(self, paramsCall): #feito
-        bindable = st.getBindable(paramsCall.id)
-        if (bindable != None and bindable[st.BINDABLE] == st.FUNCTION):
-            typeParams = paramsCall.params.accept(self)
-            if (list(bindable[st.PARAMS][1::2]) == typeParams):
-                return bindable[st.TYPE]
-            paramsCall.accept(self.printer)
-            print("\n\t[Erro] Chamada de funcao invalida. Tipos passados na chamada sao:", typeParams)
-            print('\tenquanto que os tipos definidos no metodo sao:', bindable[st.PARAMS][1::2], '\n')
-        else:
-            paramsCall.accept(self.printer)
-            print("\n\t[Erro] Chamada de funcao invalida. O id", paramsCall.id,
-                  "nao eh de uma funcao, nao foi definido ou foi definido apos esta funcao\n")
-        return None
+        pass
 
     def visitNoParamsCall(self, simpleCall): #feito
-        bindable = st.getBindable(simpleCall.id)
-        if (bindable != None and bindable[st.BINDABLE] == st.FUNCTION):
-            return bindable[st.TYPE]
-        simpleCall.accept(self.printer)
-        print("\n\t[Erro] Chamada de funcao invalida. O id", simpleCall.id, "nao eh de uma funcao, nao foi definido ou foi definido apos esta funcao\n")
-        return None
+        pass
 
     def visitSingleParams(self, params): #feito
         return [params.exp.accept(self)]
@@ -475,9 +441,9 @@ class SemanticVisitor(AbstractVisitor):
         return [params.exp.accept(self)] + params.params.accept(self)
 
     def visitAssignAssign(self, assign): #feito
-        typeVar = assign.exp2.accept(self)
-        if(isinstance(assign.exp1, sa.IdExp)):
-            st.addVar(assign.exp1.id, typeVar)
+        typeVar = assign.exp.accept(self)
+        if (isinstance(assign.id, sa.IdExp)):
+            st.addVar (assign.id.id, typeVar)
             return typeVar
         return None
 
@@ -490,7 +456,7 @@ class SemanticVisitor(AbstractVisitor):
     
     
 
-if __name__ == "__main__":
+def main():
 
     f = open("data2.txt", "r")
     lexer = lex.lex()
@@ -501,3 +467,6 @@ if __name__ == "__main__":
     svisitor = SemanticVisitor()
     for r in result:
         r.accept(svisitor)
+
+if __name__ == "__main__":
+    main()
